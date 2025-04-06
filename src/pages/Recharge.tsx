@@ -89,7 +89,7 @@ const Recharge = () => {
       if (updatedTransaction.status === "completed") {
         toast({
           title: "Pagamento confirmado!",
-          description: `Recarga de R$ ${amount.toFixed(2)} realizada com sucesso.`,
+          description: `Recarga de R$ ${typeof amount === 'number' ? amount.toFixed(2) : '0.00'} realizada com sucesso.`,
         });
         
         // In a real app, we would refresh the user's balance here
