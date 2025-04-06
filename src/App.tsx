@@ -13,6 +13,8 @@ import Recharge from "./pages/Recharge";
 import CNPJConsult from "./pages/CNPJConsult";
 import Admin from "./pages/Admin";
 import ConsultationLogs from "./pages/ConsultationLogs";
+import TokenManagement from "./pages/TokenManagement";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/consulta-cnpj" element={<CNPJConsult />} />
             <Route path="/registro-consultas" element={<ConsultationLogs />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/gerenciar-tokens" element={<TokenManagement />} />
+            <Route path="/gerenciar-usuarios" element={<UserManagement />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -1,15 +1,29 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Transaction, User } from "@/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, ChevronLeft, ChevronRight, User as UserIcon, Check, X } from "lucide-react";
+import { 
+  Search, 
+  Download, 
+  ChevronLeft, 
+  ChevronRight, 
+  User as UserIcon, 
+  Check, 
+  X, 
+  Users, 
+  Key, 
+  Settings, 
+  DollarSign, 
+  BarChart4, 
+  FileText 
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -21,6 +35,7 @@ const mockUsers: User[] = [
     email: "admin@example.com",
     document: "123.456.789-10",
     phone: "(11) 99999-9999",
+    domain: null,
     balance: 1000,
     isAdmin: true,
     createdAt: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
@@ -31,6 +46,7 @@ const mockUsers: User[] = [
     email: "user@example.com",
     document: "987.654.321-00",
     phone: "(11) 88888-8888",
+    domain: "example.com",
     balance: 250,
     isAdmin: false,
     createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
@@ -41,6 +57,7 @@ const mockUsers: User[] = [
     email: "joao@example.com",
     document: "111.222.333-44",
     phone: "(21) 99999-9999",
+    domain: "joaosilva.com.br",
     balance: 50,
     isAdmin: false,
     createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
@@ -51,6 +68,7 @@ const mockUsers: User[] = [
     email: "maria@example.com",
     document: "444.555.666-77",
     phone: "(31) 99999-9999",
+    domain: null,
     balance: 125,
     isAdmin: false,
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
@@ -159,6 +177,38 @@ const mockLogs = [
   },
 ];
 
+// Admin quick actions
+const adminActions = [
+  {
+    title: "Gerenciar Usuários",
+    description: "Administre contas, domínios e créditos",
+    icon: Users,
+    href: "/gerenciar-usuarios",
+    color: "bg-blue-500",
+  },
+  {
+    title: "Gerenciar Tokens",
+    description: "Crie e gerencie tokens da API",
+    icon: Key,
+    href: "/gerenciar-tokens",
+    color: "bg-purple-500",
+  },
+  {
+    title: "Relatórios",
+    description: "Visualize estatísticas e dados",
+    icon: BarChart4,
+    href: "#",
+    color: "bg-green-500",
+  },
+  {
+    title: "Configurações",
+    description: "Opções do sistema e da conta",
+    icon: Settings,
+    href: "#",
+    color: "bg-amber-500",
+  },
+];
+
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -246,20 +296,118 @@ const Admin = () => {
     return user ? user.name : "Usuário Desconhecido";
   };
 
+  // Calculate total balance
+  const totalUserBalance = users
+    .filter(u => !u.isAdmin)
+    .reduce((total, user) => total + user.balance, 0);
+
+  // Calculate total transactions
+  const totalDeposits = transactions
+    .filter(t => t.type === "deposit" && t.status === "completed")
+    .reduce((total, t) => total + t.amount, 0);
+
+  const totalWithdrawals = transactions
+    .filter(t => t.type === "withdrawal" && t.status === "completed")
+    .reduce((total, t) => total + t.amount, 0);
+
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
             <p className="text-muted-foreground">
-              Gerencie usuários, transações e logs do sistema
+              Gerencie usuários, transações e dados do sistema
             </p>
           </div>
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
             Exportar Dados
           </Button>
+        </div>
+
+        {/* Admin Quick Stats */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">Total de Usuários</h3>
+                  <UserIcon className="h-4 w-4 text-blue-500" />
+                </div>
+                <p className="text-2xl font-bold">{users.filter(u => !u.isAdmin).length}</p>
+                <p className="text-xs text-muted-foreground">
+                  {users.filter(u => !u.isAdmin && u.domain).length} com domínio vinculado
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">Saldo Total</h3>
+                  <DollarSign className="h-4 w-4 text-green-500" />
+                </div>
+                <p className="text-2xl font-bold">R$ {totalUserBalance.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">
+                  Créditos disponíveis no sistema
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">Pagamentos</h3>
+                  <FileText className="h-4 w-4 text-amber-500" />
+                </div>
+                <p className="text-2xl font-bold">R$ {totalDeposits.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {transactions.filter(t => t.type === "deposit" && t.status === "completed").length} transações concluídas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">Consultas</h3>
+                  <Search className="h-4 w-4 text-purple-500" />
+                </div>
+                <p className="text-2xl font-bold">{totalWithdrawals.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {transactions.filter(t => t.type === "withdrawal" && t.status === "completed").length} consultas realizadas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Admin Quick Actions */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          {adminActions.map((action, index) => (
+            <Card key={index} className="hover:shadow-md transition-all">
+              <Link to={action.href}>
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className={`${action.color} text-white p-3 rounded-lg`}>
+                      <action.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{action.title}</h3>
+                      <p className="text-sm text-muted-foreground">{action.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          ))}
         </div>
 
         <div className="flex mb-4">
@@ -331,9 +479,14 @@ const Admin = () => {
                               <div className="text-sm text-muted-foreground">
                                 <p>Documento: {u.document}</p>
                                 <p>Telefone: {u.phone}</p>
+                                {u.domain && <p>Domínio: {u.domain}</p>}
                               </div>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => navigate("/gerenciar-usuarios")}
+                                >
                                   Editar
                                 </Button>
                                 <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
@@ -348,6 +501,16 @@ const Admin = () => {
                   </div>
                 </ScrollArea>
               </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/gerenciar-usuarios")}
+                  className="gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Ver Todos os Usuários
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
           

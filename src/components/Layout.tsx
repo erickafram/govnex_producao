@@ -12,7 +12,13 @@ import {
   X,
   LogIn,
   History,
-  FileSearch
+  FileSearch,
+  Shield,
+  User,
+  Key,
+  Settings,
+  DollarSign,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -35,7 +41,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true, hideForAdmin: true },
     { name: "Consulta CNPJ", href: "/consulta-cnpj", icon: Building2, requiresAuth: true },
     { name: "Registro de Consultas", href: "/registro-consultas", icon: History, requiresAuth: true },
-    { name: "Admin", href: "/admin", icon: Users, requiresAdmin: true },
+    { name: "Painel Admin", href: "/admin", icon: Shield, requiresAdmin: true },
+    { name: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Users, requiresAdmin: true },
+    { name: "Gerenciar Tokens", href: "/gerenciar-tokens", icon: Key, requiresAdmin: true },
   ];
 
   const handleNavigation = (href: string) => {
@@ -86,10 +94,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Separator className="my-4" />
             {user ? (
               <>
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                <div className="px-3 py-2 flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium truncate max-w-[140px]">{user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate max-w-[140px]">{user.email}</p>
+                  </div>
                 </div>
+                {user.domain && (
+                  <div className="px-3 py-1 mb-2">
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Globe className="h-3 w-3 mr-1" />
+                      <span className="truncate">{user.domain}</span>
+                    </div>
+                  </div>
+                )}
+                {!user.isAdmin && (
+                  <div className="px-3 py-1 mb-2">
+                    <div className="flex items-center text-xs font-medium text-green-600">
+                      <DollarSign className="h-3 w-3 mr-1" />
+                      <span>Saldo: R$ {user.balance.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -142,10 +171,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Separator className="mb-4" />
               {user ? (
                 <>
-                  <div className="px-1 py-2">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <div className="px-1 py-2 flex items-center space-x-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
                   </div>
+                  {user.domain && (
+                    <div className="px-1 py-1 mb-2">
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Globe className="h-3 w-3 mr-1" />
+                        <span>{user.domain}</span>
+                      </div>
+                    </div>
+                  )}
+                  {!user.isAdmin && (
+                    <div className="px-1 py-1 mb-2">
+                      <div className="flex items-center text-xs font-medium text-green-600">
+                        <DollarSign className="h-3 w-3 mr-1" />
+                        <span>Saldo: R$ {user.balance.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"

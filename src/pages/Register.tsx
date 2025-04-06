@@ -14,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus } from "lucide-react";
@@ -31,6 +32,7 @@ const formSchema = z.object({
   phone: z.string()
     .min(10, "Telefone deve ter pelo menos 10 dígitos")
     .max(15, "Telefone deve ter no máximo 15 dígitos"),
+  domain: z.string().optional(),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -52,6 +54,7 @@ const Register = () => {
       email: "",
       document: "",
       phone: "",
+      domain: "",
       password: "",
       confirmPassword: "",
     },
@@ -98,6 +101,7 @@ const Register = () => {
         email: data.email,
         document: data.document,
         phone: data.phone,
+        domain: data.domain,
         password: data.password,
       });
       navigate("/dashboard");
@@ -194,6 +198,22 @@ const Register = () => {
                         disabled={isLoading} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="domain"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Domínio (opcional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="seusite.com.br" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Informe o domínio do seu site para usar nossa API
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
