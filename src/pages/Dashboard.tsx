@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import BalanceCard from "@/components/BalanceCard";
 import TransactionList from "@/components/TransactionList";
+import ConsultaLogs from "@/components/ConsultaLogs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Transaction } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -42,6 +43,24 @@ const mockTransactions: Transaction[] = [
   },
 ];
 
+// Mock data for consulta logs
+const mockConsultaLogs = [
+  {
+    id: "1",
+    cnpj_consultado: "60043704000173",
+    dominio_origem: "infovisa.gurupi.to.gov.br",
+    data_consulta: new Date(Date.now() - 3600000 * 24).toISOString(),
+    custo: 0.05,
+  },
+  {
+    id: "2",
+    cnpj_consultado: "47438705000159",
+    dominio_origem: "infovisa.gurupi.to.gov.br",
+    data_consulta: new Date(Date.now() - 3600000 * 48).toISOString(),
+    custo: 0.05,
+  },
+];
+
 // Mock data for the chart
 const chartData = [
   { name: "Jan", deposits: 120, withdrawals: 80 },
@@ -56,11 +75,13 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [consultaLogs, setConsultaLogs] = useState<any[]>([]);
   
   useEffect(() => {
-    // In a real app, fetch transactions from API
+    // In a real app, fetch transactions and logs from API
     if (user) {
       setTransactions(mockTransactions);
+      setConsultaLogs(mockConsultaLogs);
     }
   }, [user]);
 
@@ -120,7 +141,7 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <Button 
                   onClick={() => navigate("/recarga")} 
-                  className="pix-gradient text-white hover:opacity-90 h-auto py-4"
+                  className="bg-blue-600 text-white hover:bg-blue-700 h-auto py-4"
                 >
                   <div className="flex flex-col items-center text-center">
                     <CreditCard className="h-6 w-6 mb-2" />
@@ -141,6 +162,9 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Consulta Logs Section */}
+        <ConsultaLogs logs={consultaLogs} />
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
@@ -163,7 +187,7 @@ const Dashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="deposits" fill="#32BCAD" name="Entradas" />
+                    <Bar dataKey="deposits" fill="#3B82F6" name="Entradas" />
                     <Bar dataKey="withdrawals" fill="#F87171" name="Saídas" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -194,7 +218,7 @@ const Dashboard = () => {
                   <div>
                     <p className="font-medium">Consulta de CNPJ realizada</p>
                     <p className="text-sm text-muted-foreground">
-                      CNPJ: 98.765.432/0001-21
+                      CNPJ: 47.438.705/0001-59
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Há 2 dias atrás

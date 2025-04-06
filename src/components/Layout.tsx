@@ -71,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4">
           <h1 className="text-xl font-bold tracking-tight">
-            <span className="text-pix">PIX</span> Credit Nexus
+            <span className="text-blue-600">Gov</span>Nex
           </h1>
         </div>
         <div className="mt-5 flex-grow flex flex-col px-3">
@@ -115,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const renderMobileHeader = () => (
     <div className="md:hidden flex items-center justify-between p-4 border-b">
       <h1 className="text-xl font-bold tracking-tight">
-        <span className="text-pix">PIX</span> Credit Nexus
+        <span className="text-blue-600">Gov</span>Nex
       </h1>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
