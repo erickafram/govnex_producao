@@ -9,7 +9,7 @@ import ConsultaLogs from "@/components/ConsultaLogs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Transaction } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Building2, Search, CreditCard, ArrowUpRight } from "lucide-react";
+import { Building2, Search, CreditCard, ArrowUpRight, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Mock data for recent transactions
@@ -139,15 +139,17 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <Button 
-                  onClick={() => navigate("/recarga")} 
-                  className="bg-blue-600 text-white hover:bg-blue-700 h-auto py-4"
-                >
-                  <div className="flex flex-col items-center text-center">
-                    <CreditCard className="h-6 w-6 mb-2" />
-                    <span>Adicionar Créditos</span>
-                  </div>
-                </Button>
+                {!user.isAdmin && (
+                  <Button 
+                    onClick={() => navigate("/recarga")} 
+                    className="bg-blue-600 text-white hover:bg-blue-700 h-auto py-4"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <CreditCard className="h-6 w-6 mb-2" />
+                      <span>Adicionar Créditos</span>
+                    </div>
+                  </Button>
+                )}
                 <Button 
                   onClick={() => navigate("/consulta-cnpj")} 
                   variant="outline" 
@@ -156,6 +158,16 @@ const Dashboard = () => {
                   <div className="flex flex-col items-center text-center">
                     <Building2 className="h-6 w-6 mb-2" />
                     <span>Consultar CNPJ</span>
+                  </div>
+                </Button>
+                <Button 
+                  onClick={() => navigate("/registro-consultas")} 
+                  variant="outline" 
+                  className="h-auto py-4"
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <History className="h-6 w-6 mb-2" />
+                    <span>Registro de Consultas</span>
                   </div>
                 </Button>
               </div>

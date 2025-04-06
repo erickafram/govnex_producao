@@ -10,7 +10,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  LogIn
+  LogIn,
+  History,
+  FileSearch
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -30,8 +32,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requiresAuth: true },
-    { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true },
+    { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true, hideForAdmin: true },
     { name: "Consulta CNPJ", href: "/consulta-cnpj", icon: Building2, requiresAuth: true },
+    { name: "Registro de Consultas", href: "/registro-consultas", icon: History, requiresAuth: true },
     { name: "Admin", href: "/admin", icon: Users, requiresAdmin: true },
   ];
 
@@ -50,6 +53,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         // Skip if item requires admin and user is not an admin
         if (item.requiresAdmin && (!user || !user.isAdmin)) return null;
+        
+        // Skip if item should be hidden for admin and user is an admin
+        if (item.hideForAdmin && user?.isAdmin) return null;
         
         return (
           <Button
