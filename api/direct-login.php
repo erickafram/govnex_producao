@@ -1,4 +1,11 @@
 <?php
+require_once 'cors.php';
+require_once 'config.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // Adicionar cabeçalhos CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -33,17 +40,21 @@ if (empty($data['email']) || empty($data['password'])) {
     exit;
 }
 
-// Configuração do banco de dados
-$host = "localhost";
-$dbname = "govnex";
-$username = "root";
-$password = "";
+// Obter conexão com o banco de dados
+$conn = getDbConnection();
+
+// Verificar se a conexão foi estabelecida
+if (!$conn) {
+    // Log do erro
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Erro: Falha na conexão com o banco de dados\n", FILE_APPEND);
+    
+    // Responder com erro
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro interno do servidor']);
+    exit;
+}
 
 try {
-    // Conectar ao banco de dados
-    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     // Buscar usuário pelo email
     $stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = :email");
     $stmt->bindParam(':email', $data['email']);

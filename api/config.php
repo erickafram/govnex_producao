@@ -2,7 +2,18 @@
 // Carregar variáveis de ambiente do arquivo .env
 function loadEnv()
 {
-    $envFile = __DIR__ . '/../.env';
+    // Detectar ambiente
+    $isProduction = (
+        isset($_SERVER['SERVER_NAME']) && 
+        (strpos($_SERVER['SERVER_NAME'], '161.35.60.249') !== false || 
+         strpos($_SERVER['SERVER_NAME'], 'govnex.site') !== false)
+    );
+    
+    // Selecionar o arquivo .env apropriado
+    $envFile = $isProduction 
+        ? __DIR__ . '/../.env.production' 
+        : __DIR__ . '/../.env';
+    
     if (file_exists($envFile)) {
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
@@ -12,21 +23,32 @@ function loadEnv()
             }
 
             // Processar variáveis de ambiente
-            list($name, $value) = explode('=', $line, 2);
-            $name = trim($name);
-            $value = trim($value);
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
 
-            // Remover aspas se existirem
-            if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
-                $value = substr($value, 1, -1);
-            } elseif (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1) {
-                $value = substr($value, 1, -1);
+                // Remover aspas se existirem
+                if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
+                    $value = substr($value, 1, -1);
+                } elseif (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1) {
+                    $value = substr($value, 1, -1);
+                }
+
+                $_ENV[$name] = $value;
+                putenv("{$name}={$value}");
             }
-
-            $_ENV[$name] = $value;
-            putenv("{$name}={$value}");
         }
     }
+    
+    // Log do ambiente carregado
+    $logFile = __DIR__ . '/config_log.txt';
+    file_put_contents(
+        $logFile, 
+        date('Y-m-d H:i:s') . " - Ambiente: " . ($isProduction ? "Produção" : "Desenvolvimento") . 
+        ", Arquivo: " . $envFile . "\n", 
+        FILE_APPEND
+    );
 }
 
 // Carregar variáveis de ambiente
