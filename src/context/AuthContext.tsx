@@ -27,7 +27,7 @@ const API_URL = "";
 
 // API functions
 const apiLogin = async (email: string, password: string): Promise<User> => {
-  const response = await fetch(`${API_URL}/api/login.php`, {
+  const response = await fetch(`${API_URL}/api/direct-login.php`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -147,13 +147,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(data.error || "Falha ao fazer login");
       }
       
-      // Garantir que o usuário tenha a propriedade isAdmin baseada no nivel_acesso
-      const userData = data.user;
-      userData.isAdmin = userData.isAdmin || userData.accessLevel === "administrador";
+      // Mapear os campos do backend para o formato esperado pelo frontend
+      const userData = {
+        ...data.user,
+        // Garantir que as propriedades estejam no formato esperado pelo frontend
+        id: data.user.id.toString(),
+        name: data.user.nome || data.user.name,
+        document: data.user.cpf || data.user.cnpj || data.user.document,
+        phone: data.user.telefone || data.user.phone,
+        domain: data.user.dominio || data.user.domain,
+        dominio: data.user.dominio || data.user.domain,
+        balance: parseFloat(data.user.credito || data.user.balance || 0),
+        credito: parseFloat(data.user.credito || data.user.balance || 0),
+        isAdmin: data.user.isAdmin || data.user.nivel_acesso === "administrador" || data.user.accessLevel === "administrador",
+        nivel_acesso: data.user.nivel_acesso || data.user.accessLevel,
+        accessLevel: data.user.nivel_acesso || data.user.accessLevel,
+        createdAt: data.user.data_cadastro || data.user.createdAt
+      };
       
       // Gerar um token simples (em produção, isso viria do backend)
-      const token = `token_${userData.id}_${Date.now()}`;
+      const token = data.token || `token_${userData.id}_${Date.now()}`;
       userData.token = token;
+      
+      console.log('Dados do usuário processados:', userData);
       
       setUser(userData);
       

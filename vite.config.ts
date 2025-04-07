@@ -7,20 +7,32 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8081,
+    port: 8081, // Alterando para a porta que você está usando
     proxy: {
       // Proxy API requests to the PHP server
       '/api': {
-        target: 'http://localhost/react/govnex/novogovnex/pix-credit-nexus', // Caminho correto para o servidor Apache/PHP
+        target: 'http://localhost/react/govnex/pix-credit-nexus/api', // Caminho correto para o servidor Apache/PHP
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api') // Mantém o prefixo /api
+        rewrite: (path) => path.replace(/^\/api/, ''), // Remove o prefixo /api
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Enviando requisição para:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Recebendo resposta de:', req.method, req.url, 'status:', proxyRes.statusCode);
+          });
+        }
       },
       // Proxy para a pasta temp (QR codes)
       '/temp': {
-        target: 'http://localhost/react/govnex/novogovnex/pix-credit-nexus',
+        target: 'http://localhost/react/govnex/pix-credit-nexus/temp',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/temp/, '')
       }
     }
   },

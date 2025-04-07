@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -43,7 +42,7 @@ const Login = () => {
     try {
       const user = await login(data.email, data.password);
       // Redirecionar com base no nível de acesso do usuário
-      if (user && (user.isAdmin || user.accessLevel === 'admin')) {
+      if (user && (user.isAdmin || user.accessLevel === 'administrador' || user.nivel_acesso === 'administrador')) {
         navigate("/admin");
       } else {
         navigate("/dashboard");

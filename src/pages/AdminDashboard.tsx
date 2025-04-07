@@ -12,7 +12,8 @@ interface ExtendedUser extends User {
   createdAt: string;
   accessLevel?: string;
 }
-import { API_URL, CONFIG } from "@/config";
+import { CONFIG } from "@/config";
+import { getApiUrl } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -104,6 +105,9 @@ const AdminDashboard = () => {
   const [consultas, setConsultas] = useState<ConsultationLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Constantes
+  const API_URL = getApiUrl();
+
   // Função para buscar estatísticas
   const fetchStats = async () => {
     try {
@@ -112,13 +116,28 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("token");
       console.log("Token usado na requisição:", token);
       
-      const response = await fetch(`${API_URL}/admin_stats.php`, {
+      const response = await fetch(`${getApiUrl('admin_stats.php')}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
       });
       
       console.log("Status da resposta:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erro na resposta:", errorText);
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Resposta não é JSON:", text);
+        throw new Error("Resposta inválida do servidor");
+      }
       
       const data = await response.json();
       if (data.success) {
@@ -141,11 +160,26 @@ const AdminDashboard = () => {
       // Obter o token do localStorage
       const token = localStorage.getItem("token");
       
-      const response = await fetch(`${API_URL}/admin_users.php?page=${page}&limit=${itemsPerPage}`, {
+      const response = await fetch(`${getApiUrl('admin_users.php')}?page=${page}&limit=${itemsPerPage}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erro na resposta:", errorText);
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Resposta não é JSON:", text);
+        throw new Error("Resposta inválida do servidor");
+      }
       
       const data = await response.json();
       if (data.success) {
@@ -168,11 +202,26 @@ const AdminDashboard = () => {
       // Obter o token do localStorage
       const token = localStorage.getItem("token");
       
-      const response = await fetch(`${API_URL}/admin_payments.php?page=${page}&limit=${itemsPerPage}`, {
+      const response = await fetch(`${getApiUrl('admin_payments.php')}?page=${page}&limit=${itemsPerPage}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erro na resposta:", errorText);
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Resposta não é JSON:", text);
+        throw new Error("Resposta inválida do servidor");
+      }
       
       const data = await response.json();
       if (data.success) {
@@ -195,11 +244,26 @@ const AdminDashboard = () => {
       // Obter o token do localStorage
       const token = localStorage.getItem("token");
       
-      const response = await fetch(`${API_URL}/admin_consultas.php?page=${page}&limit=${itemsPerPage}`, {
+      const response = await fetch(`${getApiUrl('admin_consultas.php')}?page=${page}&limit=${itemsPerPage}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erro na resposta:", errorText);
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Resposta não é JSON:", text);
+        throw new Error("Resposta inválida do servidor");
+      }
       
       const data = await response.json();
       if (data.success) {

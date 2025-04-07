@@ -80,6 +80,8 @@ try {
                 nome as name, 
                 email, 
                 COALESCE(cpf, cnpj) as document, 
+                cpf,
+                cnpj,
                 telefone as phone, 
                 dominio as domain, 
                 credito as balance, 
@@ -97,6 +99,14 @@ try {
         if ($updatedUser) {
             // Converter isAdmin para booleano
             $updatedUser['isAdmin'] = (bool)$updatedUser['isAdmin'];
+            
+            // Garantir que os valores numéricos sejam do tipo correto
+            $updatedUser['balance'] = floatval($updatedUser['balance']);
+            $updatedUser['credito'] = floatval($updatedUser['balance']); // Adicionar campo credito para compatibilidade
+            $updatedUser['dominio'] = $updatedUser['domain']; // Adicionar campo dominio para compatibilidade
+            
+            // Log para depuração
+            file_put_contents('update_log.txt', date('Y-m-d H:i:s') . " - Usuário atualizado: " . json_encode($updatedUser) . "\n", FILE_APPEND);
             
             echo json_encode([
                 'success' => true,

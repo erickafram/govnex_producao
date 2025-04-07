@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -161,7 +160,7 @@ const UserManagement = () => {
         body: JSON.stringify({
           userId: selectedUser.id,
           domain: domainInput,
-          balance: parseFloat(creditInput) || 0
+          balance: parseFloat(creditInput.replace(',', '.')) || 0
         }),
       });
 
@@ -173,10 +172,23 @@ const UserManagement = () => {
       
       // Atualizar a lista de usuários com os dados atualizados
       if (data.user) {
+        // Atualizar o usuário selecionado com os novos valores
+        const updatedUser = {
+          ...selectedUser,
+          domain: domainInput,
+          dominio: domainInput,
+          balance: parseFloat(creditInput.replace(',', '.')),
+          credito: parseFloat(creditInput.replace(',', '.'))
+        };
+        
+        // Atualizar a lista de usuários
         const updatedUsers = users.map(u => 
-          u.id === selectedUser.id ? data.user : u
+          u.id === selectedUser.id ? updatedUser : u
         );
+        
+        // Atualizar os estados
         setUsers(updatedUsers);
+        setSelectedUser(updatedUser);
       } else {
         // Recarregar a lista de usuários se não recebemos o usuário atualizado
         fetchUsers(currentPage);

@@ -2,13 +2,20 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  document: string; // CPF or CNPJ
+  document?: string; // CPF or CNPJ
+  cpf?: string;
+  cnpj?: string;
   phone?: string;
+  telefone?: string;
   domain?: string | null;
-  balance: number;
-  isAdmin: boolean;
-  createdAt: string;
+  dominio?: string | null;
+  balance?: number;
+  credito?: number;
+  isAdmin?: boolean;
+  createdAt?: string;
+  data_cadastro?: string;
   accessLevel?: string;
+  nivel_acesso?: string;
   token?: string; // Token de autenticação
 }
 

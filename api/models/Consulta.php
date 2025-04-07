@@ -134,6 +134,35 @@ class Consulta
     }
 
     /**
+     * Buscar todas as consultas com limite opcional
+     * 
+     * @param int $limit Limite de registros (0 para sem limite)
+     * @return array Lista de consultas
+     */
+    public function getAll($limit = 100)
+    {
+        try {
+            $query = "SELECT * FROM consultas_log ORDER BY data_consulta DESC";
+            
+            if ($limit > 0) {
+                $query .= " LIMIT :limit";
+            }
+            
+            $stmt = $this->conn->prepare($query);
+            
+            if ($limit > 0) {
+                $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            }
+            
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar todas as consultas: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Verificar se um usuário tem crédito suficiente para realizar consultas
      * 
      * @param string $dominio Domínio do usuário

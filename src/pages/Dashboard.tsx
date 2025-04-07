@@ -11,6 +11,8 @@ import { Building2, Search, CreditCard, ArrowUpRight, History, RefreshCw, Receip
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 // API URL
 const API_URL = "http://localhost:8000";
@@ -184,6 +186,15 @@ const Dashboard = () => {
         <p className="text-muted-foreground">
           Bem-vindo, {user.name}. Aqui está um resumo da sua conta.
         </p>
+
+        {/* Aviso importante sobre aumento do custo da API */}
+        <Alert className="my-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertTitle className="text-amber-800 dark:text-amber-400 font-bold">Aviso Importante!</AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-300">
+            A partir de 03/04/2025 nossa API passará a custar R$ 0,12 por consulta devido ao aumento da base com dados e informações de estabelecimentos vindos da Receita Federal.
+          </AlertDescription>
+        </Alert>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <BalanceCard balance={user.balance} />

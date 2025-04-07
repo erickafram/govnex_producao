@@ -38,12 +38,13 @@ const UserProfile = () => {
   // Inicializar dados do perfil quando o usuário estiver disponível
   useEffect(() => {
     if (user) {
+      console.log("Dados do usuário:", user);
       setProfileData({
         name: user.name || "",
         email: user.email || "",
         document: user.document || "",
         phone: user.phone || "",
-        domain: user.domain || ""
+        domain: user.domain || user.dominio || ""
       });
     } else {
       navigate("/login");

@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConsultaLog } from "@/components/ConsultaLogs";
 
 // API URL para uso direto (desenvolvimento)
-const API_URL = "http://localhost:8000";
+const API_URL = "/api";
 
 // API URL para uso com proxy reverso (produção)
 const GOVNEX_API_URL = "https://infovisa.gurupi.to.gov.br/api/govnex"; // Ajuste para a URL correta do seu proxy
@@ -203,9 +203,9 @@ const RegistroConsultas = () => {
                 // Token de autenticação - Em produção, deve vir de um local seguro
                 const apiToken = localStorage.getItem('apiToken') || 'seu_token_de_acesso';
 
-                // Tentar buscar dados da API do GovNex através do proxy
+                // Tentar buscar dados da API
                 const response = await fetch(
-                    `${baseApiUrl}/consultas-estatisticas.php?token=${apiToken}&dominio=${user.domain}&incluirConsultas=true`,
+                    `${baseApiUrl}/consultas-estatisticas.php?dominio=${user?.dominio || user?.domain || ''}&incluirConsultas=true`,
                     {
                         headers: {
                             'Content-Type': 'application/json',
@@ -252,26 +252,11 @@ const RegistroConsultas = () => {
             } catch (error) {
                 console.error('Erro ao carregar consultas:', error);
 
-                // Em caso de falha, tentar buscar do endpoint local ou usar dados de fallback
-                try {
-                    const fallbackResponse = await fetch(`${API_URL}/api/consultas-estatisticas.php?dominio=${user.domain}&incluirConsultas=true`);
-                    if (fallbackResponse.ok) {
-                        const fallbackData = await fallbackResponse.json();
-                        if (fallbackData.success) {
-                            setLogs(fallbackData.consultas || []);
-                            setTotalConsultas(fallbackData.totalConsultas || 0);
-                            setTotalValorGasto(fallbackData.totalGasto || 0);
-                            setIsLoading(false);
-                            return;
-                        }
-                    }
-                } catch (fallbackError) {
-                    console.error('Erro ao carregar dados de fallback:', fallbackError);
-                }
-
-                // Se tudo falhar, usar mock data
+                // Em caso de falha, usar mock data
                 setTimeout(() => {
                     setLogs(mockConsultaLogs);
+                    setTotalConsultas(mockConsultaLogs.length);
+                    setTotalValorGasto(mockConsultaLogs.reduce((total, log) => total + log.custo, 0));
                     setIsLoading(false);
                 }, 500);
             }

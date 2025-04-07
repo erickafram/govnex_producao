@@ -11,13 +11,19 @@ class Database {
         $serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
         $isProduction = ($serverName === '161.35.60.249' || $serverName === 'govnex.site' || strpos($serverName, '.govnex.site') !== false);
         
+        // Log para depuração
+        $logFile = __DIR__ . '/../db_log.txt';
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Tentando conectar ao banco de dados\n", FILE_APPEND);
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Ambiente: " . ($isProduction ? "Produção" : "Desenvolvimento") . "\n", FILE_APPEND);
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Server Name: " . $serverName . "\n", FILE_APPEND);
+        
         // Configurar conexão com base no ambiente
         if ($isProduction) {
             // Configurações de produção
             $this->host = "localhost"; // Normalmente continua sendo localhost em produção
             $this->db_name = "govnex";
-            $this->username = "root"; // Substitua pelo usuário de produção
-            $this->password = ""; // Substitua pela senha de produção
+            $this->username = "govnex"; // Usuário de produção
+            $this->password = "@@2025@@Ekb"; // Senha de produção
         } else {
             // Configurações de desenvolvimento
             $this->host = "localhost";
@@ -28,7 +34,7 @@ class Database {
         
         // Log para depuração
         $logFile = __DIR__ . '/../db_log.txt';
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Ambiente: " . ($isProduction ? "Produção" : "Desenvolvimento") . "\n", FILE_APPEND);
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Conexão com o banco de dados configurada\n", FILE_APPEND);
     }
 
     public function getConnection() {

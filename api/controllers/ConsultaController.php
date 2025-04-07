@@ -144,6 +144,10 @@ class ConsultaController
         $dominio = isset($_GET['dominio']) ? $_GET['dominio'] : null;
 
         try {
+            // Log para depuração
+            $logFile = __DIR__ . '/../consultas_log.txt';
+            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Solicitação de estatísticas para domínio: " . ($dominio ?: 'todos') . "\n", FILE_APPEND);
+            
             // Obter estatísticas
             $totalConsultas = $this->consultaModel->getTotalConsultas($dominio);
             $totalGasto = $this->consultaModel->getTotalGasto($dominio);
@@ -152,8 +156,16 @@ class ConsultaController
             $incluirConsultas = isset($_GET['incluirConsultas']) && $_GET['incluirConsultas'] === 'true';
             $consultas = [];
             
-            if ($incluirConsultas && $dominio) {
-                $consultas = $this->consultaModel->getByDominio($dominio, 0); // 0 para buscar todas
+            if ($incluirConsultas) {
+                if ($dominio) {
+                    $consultas = $this->consultaModel->getByDominio($dominio, 0); // 0 para buscar todas
+                } else {
+                    // Se não foi especificado um domínio, buscar todas as consultas (limitado a 100)
+                    $consultas = $this->consultaModel->getAll(100);
+                }
+                
+                // Log do número de consultas encontradas
+                file_put_contents($logFile, date('Y-m-d H:i:s') . " - Consultas encontradas: " . count($consultas) . "\n", FILE_APPEND);
             }
 
             jsonResponse([
