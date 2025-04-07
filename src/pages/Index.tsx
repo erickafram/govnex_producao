@@ -45,12 +45,40 @@ const Index = () => {
   const [infovisaOpen, setInfovisaOpen] = useState(false);
   const [apiCnpjOpen, setApiCnpjOpen] = useState(false);
 
-  // If user is already logged in, redirect to dashboard
-  React.useEffect(() => {
+  // Se o usuário já estiver logado, mostrar botão para ir ao dashboard
+  // em vez de redirecionar automaticamente
+  const renderUserActions = () => {
     if (user) {
-      navigate("/dashboard");
+      return (
+        <Button
+          onClick={() => navigate("/dashboard")}
+          size="lg"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Acessar Dashboard
+        </Button>
+      );
     }
-  }, [user, navigate]);
+    
+    return (
+      <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+        <Button
+          onClick={() => navigate("/login")}
+          size="lg"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Entrar
+        </Button>
+        <Button
+          onClick={() => navigate("/registro")}
+          variant="outline"
+          size="lg"
+        >
+          Cadastrar
+        </Button>
+      </div>
+    );
+  };
 
   const features = [
     {
@@ -185,21 +213,33 @@ const Index = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button 
-              onClick={() => navigate("/login")} 
-              variant="outline" 
-              size="sm" 
-              className="hidden sm:inline-flex"
-            >
-              Entrar
-            </Button>
-            <Button 
-              onClick={() => navigate("/registro")} 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Cadastrar
-            </Button>
+            {user ? (
+              <Button 
+                onClick={() => navigate("/dashboard")} 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Acessar Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  onClick={() => navigate("/login")} 
+                  variant="outline" 
+                  size="sm" 
+                  className="hidden sm:inline-flex"
+                >
+                  Entrar
+                </Button>
+                <Button 
+                  onClick={() => navigate("/registro")} 
+                  size="sm" 
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Cadastrar
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -215,21 +255,8 @@ const Index = () => {
               <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in" style={{animationDelay: "0.2s"}}>
                 Tecnologia e inovação para transformar a gestão pública e privada.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in" style={{animationDelay: "0.4s"}}>
-                <Button
-                  onClick={() => navigate("/login")}
-                  size="lg"
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Entrar
-                </Button>
-                <Button
-                  onClick={() => navigate("/registro")}
-                  variant="outline"
-                  size="lg"
-                >
-                  Cadastrar
-                </Button>
+              <div className="animate-fade-in" style={{animationDelay: "0.4s"}}>
+                {renderUserActions()}
               </div>
             </div>
             <div className="lg:w-1/2 flex justify-center lg:justify-end animate-fade-in" style={{animationDelay: "0.6s"}}>

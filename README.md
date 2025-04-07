@@ -1,73 +1,59 @@
-# Welcome to your Lovable project
+# PIX Credit Nexus
 
-## Project info
+Sistema de gerenciamento de créditos PIX com consulta de CNPJ.
 
-**URL**: https://lovable.dev/projects/1e80f84b-0e48-47ce-8bdc-d0775dd71858
+## Configuração
 
-## How can I edit this code?
+1. Certifique-se de ter o PHP 7.4+ e o MySQL instalados
+2. Configure o arquivo `.env` com suas credenciais de banco de dados
+3. Importe o arquivo `api/database.sql` para criar a estrutura do banco de dados
+4. Execute o script para adicionar usuários de demonstração:
+   ```
+   php api/add_demo_users.php
+   ```
 
-There are several ways of editing your application.
+## Executando o projeto
 
-**Use Lovable**
+Para iniciar o frontend e o backend juntos:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1e80f84b-0e48-47ce-8bdc-d0775dd71858) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+npm run dev:all
 ```
 
-**Edit a file directly in GitHub**
+Isso iniciará:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Frontend React em: http://localhost:8080
+- Backend PHP em: http://localhost:8000
 
-**Use GitHub Codespaces**
+## Credenciais de teste
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Usuário comum**: user@example.com / password
+- **Administrador**: admin@example.com / password
 
-## What technologies are used for this project?
+## Estrutura do Projeto
 
-This project is built with:
+### Frontend (React + TypeScript + Vite)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- `/src` - Código fonte do frontend
+  - `/components` - Componentes React reutilizáveis
+  - `/context` - Contextos React (AuthContext, etc.)
+  - `/hooks` - Hooks personalizados
+  - `/pages` - Páginas da aplicação
+  - `/services` - Serviços para comunicação com a API
+  - `/types` - Definições de tipos TypeScript
 
-## How can I deploy this project?
+### Backend (PHP)
 
-Simply open [Lovable](https://lovable.dev/projects/1e80f84b-0e48-47ce-8bdc-d0775dd71858) and click on Share -> Publish.
+- `/api` - Código fonte do backend
+  - `/controllers` - Controladores da API
+  - `/models` - Modelos de dados
+  - `config.php` - Configuração do banco de dados e utilitários
+  - `*.php` - Endpoints da API
 
-## Can I connect a custom domain to my Lovable project?
+## Funcionalidades
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Autenticação de usuários
+- Gerenciamento de créditos
+- Consulta de CNPJ
+- Registro de consultas
+- Painel administrativo

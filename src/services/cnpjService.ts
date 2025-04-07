@@ -77,6 +77,9 @@ const validateCNPJ = (cnpj: string): boolean => {
   return normalizedCNPJ.length === 14;
 };
 
+// API URL
+const API_URL = "http://localhost:8000";
+
 // Function to query CNPJ data
 export const queryCNPJ = async (cnpj: string): Promise<CNPJData> => {
   // Validate CNPJ format
@@ -87,39 +90,73 @@ export const queryCNPJ = async (cnpj: string): Promise<CNPJData> => {
   // Normalize CNPJ
   const normalizedCNPJ = normalizeCNPJ(cnpj);
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Check if we have mock data for this CNPJ
-  if (mockCNPJData[normalizedCNPJ]) {
-    return mockCNPJData[normalizedCNPJ];
+  try {
+    // Get user domain from localStorage
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      throw new Error("Usuário não autenticado");
+    }
+    
+    const user = JSON.parse(userStr);
+    const domain = user.domain;
+    
+    if (!domain) {
+      throw new Error("Domínio não configurado para este usuário");
+    }
+    
+    // Registrar a consulta no backend
+    const response = await fetch(`${API_URL}/api/cnpj.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cnpj: normalizedCNPJ,
+        dominio: domain
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      if (data.code === 'INSUFFICIENT_CREDIT') {
+        throw new Error("Crédito insuficiente para realizar esta consulta");
+      }
+      throw new Error(data.error || "Erro ao processar consulta");
+    }
+    
+    // Para fins de demonstração, ainda usamos os dados mockados
+    // Em um ambiente real, a API retornaria os dados reais do CNPJ
+    
+    // Check if we have mock data for this CNPJ
+    if (mockCNPJData[normalizedCNPJ]) {
+      return mockCNPJData[normalizedCNPJ];
+    }
+    
+    // Generate a random response for demonstration
+    return {
+      cnpj: cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"),
+      razaoSocial: `EMPRESA ${normalizedCNPJ.substring(0, 5)} LTDA`,
+      nomeFantasia: `EMPRESA ${normalizedCNPJ.substring(0, 3)}`,
+      situacao: Math.random() > 0.2 ? "ATIVA" : "BAIXADA",
+      dataSituacao: "01/01/2020",
+      endereco: {
+        logradouro: "RUA GERADA AUTOMATICAMENTE",
+        numero: String(Math.floor(Math.random() * 1000) + 1),
+        complemento: "",
+        cep: "00000-000",
+        bairro: "CENTRO",
+        municipio: "SÃO PAULO",
+        uf: "SP"
+      },
+      atividadePrincipal: {
+        codigo: "00.00-0-00",
+        descricao: "ATIVIDADE GENÉRICA DE DEMONSTRAÇÃO"
+      },
+      capitalSocial: Math.floor(Math.random() * 1000000)
+    };
+  } catch (error) {
+    console.error("Erro na consulta de CNPJ:", error);
+    throw error;
   }
-  
-  // For demonstration, return a mock response for any valid CNPJ
-  if (normalizedCNPJ === "12345678901234") {
-    throw new Error("CNPJ não encontrado na base de dados");
-  }
-  
-  // Generate a random response for demonstration
-  return {
-    cnpj: cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"),
-    razaoSocial: `EMPRESA ${normalizedCNPJ.substring(0, 5)} LTDA`,
-    nomeFantasia: `EMPRESA ${normalizedCNPJ.substring(0, 3)}`,
-    situacao: Math.random() > 0.2 ? "ATIVA" : "BAIXADA",
-    dataSituacao: "01/01/2020",
-    endereco: {
-      logradouro: "RUA GERADA AUTOMATICAMENTE",
-      numero: String(Math.floor(Math.random() * 1000) + 1),
-      complemento: "",
-      cep: "00000-000",
-      bairro: "CENTRO",
-      municipio: "SÃO PAULO",
-      uf: "SP"
-    },
-    atividadePrincipal: {
-      codigo: "00.00-0-00",
-      descricao: "ATIVIDADE GENÉRICA DE DEMONSTRAÇÃO"
-    },
-    capitalSocial: Math.floor(Math.random() * 1000000)
-  };
 };

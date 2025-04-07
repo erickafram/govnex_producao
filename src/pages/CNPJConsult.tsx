@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -66,10 +65,10 @@ const CNPJConsult = () => {
   };
 
   const onSubmit = async (data: FormData) => {
-    if (user.balance < 5) {
+    if (user.balance < 0.12) {
       toast({
         title: "Saldo insuficiente",
-        description: "Você precisa de pelo menos R$ 5,00 para realizar uma consulta.",
+        description: "Você não tem crédito suficiente para realizar uma consulta.",
         variant: "destructive",
       });
       return;
@@ -79,8 +78,20 @@ const CNPJConsult = () => {
     try {
       const result = await queryCNPJ(data.cnpj);
       setResult(result);
-      
-      // In a real app, we would debit the user's balance and save the consultation
+
+      // Atualizar o saldo do usuário no localStorage
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userData = JSON.parse(userStr);
+        userData.balance = userData.balance - 0.12; // Custo da consulta
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        // Atualizar o contexto de autenticação
+        if (user) {
+          user.balance = userData.balance;
+        }
+      }
+
       toast({
         title: "Consulta realizada com sucesso",
         description: `Informações da empresa ${result.razaoSocial} foram carregadas.`,
@@ -166,13 +177,16 @@ const CNPJConsult = () => {
                     />
                   </form>
                 </Form>
-                
+
                 <div className="mt-4 text-sm">
                   <p className="text-muted-foreground">
-                    Custo da consulta: <span className="font-medium text-foreground">R$ 5,00</span>
+                    Custo da consulta: <span className="font-medium text-foreground">R$ 0,12</span>
                   </p>
                   <p className="text-muted-foreground">
-                    Seu saldo: <span className="font-medium text-foreground">R$ {user.balance.toFixed(2)}</span>
+                    Seu saldo: <span className="font-medium text-foreground">R$ {typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00'}</span>
+                  </p>
+                  <p className="text-muted-foreground">
+                    Consultas disponíveis: <span className="font-medium text-foreground">{typeof user.balance === 'number' ? Math.floor(user.balance / 0.12) : 0}</span>
                   </p>
                 </div>
               </CardContent>
@@ -185,7 +199,7 @@ const CNPJConsult = () => {
                   <div className="text-sm">
                     <p className="font-medium">Demonstração</p>
                     <p className="text-muted-foreground">
-                      Para testar, use os CNPJs: "12.345.678/0001-90" ou "98.765.432/0001-21". 
+                      Para testar, use os CNPJs: "12.345.678/0001-90" ou "98.765.432/0001-21".
                       Você também pode inserir qualquer CNPJ válido para ver uma resposta simulada.
                     </p>
                   </div>

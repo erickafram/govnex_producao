@@ -1,14 +1,13 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  LayoutDashboard, 
-  CreditCard, 
-  Building2, 
-  Users, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  CreditCard,
+  Building2,
+  Users,
+  LogOut,
+  Menu,
   X,
   LogIn,
   History,
@@ -18,7 +17,8 @@ import {
   Key,
   Settings,
   DollarSign,
-  Globe
+  Globe,
+  Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -41,6 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true, hideForAdmin: true },
     { name: "Consulta CNPJ", href: "/consulta-cnpj", icon: Building2, requiresAuth: true },
     { name: "Registro de Consultas", href: "/registro-consultas", icon: History, requiresAuth: true },
+    { name: "Histórico de Transações", href: "/transacoes", icon: Receipt, requiresAuth: true },
     { name: "Painel Admin", href: "/admin", icon: Shield, requiresAdmin: true },
     { name: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Users, requiresAdmin: true },
     { name: "Gerenciar Tokens", href: "/gerenciar-tokens", icon: Key, requiresAdmin: true },
@@ -58,13 +59,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {navigation.map((item) => {
         // Skip if item requires authentication and user is not logged in
         if (item.requiresAuth && !user) return null;
-        
+
         // Skip if item requires admin and user is not an admin
         if (item.requiresAdmin && (!user || !user.isAdmin)) return null;
-        
+
         // Skip if item should be hidden for admin and user is an admin
         if (item.hideForAdmin && user?.isAdmin) return null;
-        
+
         return (
           <Button
             key={item.name}
@@ -115,7 +116,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <div className="px-3 py-1 mb-2">
                     <div className="flex items-center text-xs font-medium text-green-600">
                       <DollarSign className="h-3 w-3 mr-1" />
-                      <span>Saldo: R$ {user.balance.toFixed(2)}</span>
+                      <span>Saldo: R$ {typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00'}</span>
                     </div>
                   </div>
                 )}
@@ -192,7 +193,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="px-1 py-1 mb-2">
                       <div className="flex items-center text-xs font-medium text-green-600">
                         <DollarSign className="h-3 w-3 mr-1" />
-                        <span>Saldo: R$ {user.balance.toFixed(2)}</span>
+                        <span>Saldo: R$ {typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00'}</span>
                       </div>
                     </div>
                   )}

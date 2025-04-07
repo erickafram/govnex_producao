@@ -219,7 +219,7 @@ const UserManagement = () => {
                       </TableCell>
                       <TableCell>
                         <Badge className="bg-green-100 text-green-800">
-                          R$ {user.balance.toFixed(2)}
+                          R$ {typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00'}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>

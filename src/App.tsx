@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,12 +8,13 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Recharge from "./pages/Recharge";
+import Recarga from "./pages/Recarga";
 import CNPJConsult from "./pages/CNPJConsult";
 import Admin from "./pages/Admin";
-import ConsultationLogs from "./pages/ConsultationLogs";
+import RegistroConsultas from "./pages/RegistroConsultas";
 import TokenManagement from "./pages/TokenManagement";
 import UserManagement from "./pages/UserManagement";
+import TransactionHistory from "./pages/TransactionHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +31,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/recarga" element={<Recharge />} />
+            <Route path="/recarga" element={<Recarga />} />
             <Route path="/consulta-cnpj" element={<CNPJConsult />} />
-            <Route path="/registro-consultas" element={<ConsultationLogs />} />
+            <Route path="/registro-consultas" element={<RegistroConsultas />} />
+            <Route path="/transacoes" element={<TransactionHistory />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/gerenciar-tokens" element={<TokenManagement />} />
             <Route path="/gerenciar-usuarios" element={<UserManagement />} />

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
+import {
   Table,
   TableBody,
   TableCaption,
@@ -92,14 +92,14 @@ const ConsultationLogs = () => {
 
   // Filter logs based on search term and date
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = searchTerm 
+    const matchesSearch = searchTerm
       ? log.cnpj_consultado.includes(searchTerm) || log.dominio_origem.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    
-    const matchesDate = date 
-      ? new Date(log.data_consulta).toDateString() === date.toDateString() 
+
+    const matchesDate = date
+      ? new Date(log.data_consulta).toDateString() === date.toDateString()
       : true;
-    
+
     return matchesSearch && matchesDate;
   });
 
@@ -171,9 +171,9 @@ const ConsultationLogs = () => {
                 </PopoverContent>
               </Popover>
               {date && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setDate(undefined)}
                   className="w-full md:w-auto"
                 >
@@ -232,12 +232,12 @@ const ConsultationLogs = () => {
                 </Table>
               </div>
             )}
-            
+
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center space-x-2 mt-6">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -247,8 +247,8 @@ const ConsultationLogs = () => {
                 <span className="text-sm text-muted-foreground">
                   Página {currentPage} de {totalPages}
                 </span>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}

@@ -21,7 +21,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ balance }) => {
         <div className="flex flex-col space-y-3">
           <div className="flex items-baseline">
             <span className="text-3xl font-bold">
-              R$ {balance.toFixed(2)}
+              R$ {typeof balance === 'number' ? balance.toFixed(2) : '0.00'}
             </span>
           </div>
           <Button 

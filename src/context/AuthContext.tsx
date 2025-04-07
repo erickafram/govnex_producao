@@ -1,68 +1,55 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthContextType, User, RegisterData } from "@/types";
 
-// Mock API functions
-const mockLogin = async (email: string, password: string): Promise<User> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-  // Mock validation
-  if (email === "admin@example.com" && password === "password") {
-    return {
-      id: "1",
-      name: "Admin User",
-      email: "admin@example.com",
-      document: "12345678901234",
-      phone: "11999999999",
-      domain: null,
-      balance: 1000,
-      isAdmin: true,
-      createdAt: new Date().toISOString(),
-    };
-  } else if (email === "user@example.com" && password === "password") {
-    return {
-      id: "2",
-      name: "Regular User",
-      email: "user@example.com",
-      document: "12345678901",
-      phone: "11988888888",
-      domain: "example.com",
-      balance: 250,
-      isAdmin: false,
-      createdAt: new Date().toISOString(),
-    };
+// API URL - Using empty base URL for proxy
+const API_URL = "";
+
+// API functions
+const apiLogin = async (email: string, password: string): Promise<User> => {
+  const response = await fetch(`${API_URL}/api/login.php`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Falha ao fazer login");
   }
-  
-  throw new Error("Credenciais inválidas");
+
+  return data.user;
 };
 
-const mockRegister = async (userData: RegisterData): Promise<User> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-  // Mock registration
-  return {
-    id: "3",
-    name: userData.name,
-    email: userData.email,
-    document: userData.document,
-    phone: userData.phone,
-    domain: userData.domain || null,
-    balance: 0,
-    isAdmin: false,
-    createdAt: new Date().toISOString(),
-  };
+const apiRegister = async (userData: RegisterData): Promise<User> => {
+  const response = await fetch(`${API_URL}/api/register.php`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Falha ao criar conta");
+  }
+
+  return data.user;
 };
 
 // Default state
 const defaultAuthContext: AuthContextType = {
   user: null,
   isLoading: true,
-  login: async () => {},
-  register: async () => {},
-  logout: () => {},
+  login: async () => { },
+  register: async () => { },
+  logout: () => { },
+  updateUser: () => { },
 };
 
 // Create context
@@ -74,34 +61,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Check if user is already logged in
   useEffect(() => {
-    // Check for stored user on app load
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("user");
+    const checkAuth = async () => {
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("token");
+
+      if (storedUser && storedToken) {
+        try {
+          setUser(JSON.parse(storedUser));
+          console.log("Usuário autenticado carregado do localStorage");
+        } catch (error) {
+          console.error("Erro ao carregar usuário do localStorage:", error);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
+      } else {
+        // For development, set a default token
+        console.log("Definindo token de desenvolvimento");
+        localStorage.setItem("token", "dev_token_user_1");
       }
-    }
-    setIsLoading(false);
+      
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const userData = await mockLogin(email, password);
+      const userData = await apiLogin(email, password);
       setUser(userData);
+      
+      // Store user data and token in localStorage
       localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", userData.token || "dev_token_user_1");
+      
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo, ${userData.name}!`,
+        description: `Bem-vindo, ${userData.name || userData.email}!`,
       });
+      
+      return userData;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
-        title: "Erro de autenticação",
-        description: error instanceof Error ? error.message : "Falha ao fazer login",
+        title: "Falha ao fazer login",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -113,9 +120,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData) => {
     setIsLoading(true);
     try {
-      const newUser = await mockRegister(userData);
+      const newUser = await apiRegister(userData);
       setUser(newUser);
       localStorage.setItem("user", JSON.stringify(newUser));
+      
+      // Armazenar o token de desenvolvimento para autenticação
+      // Em um sistema de produção, o token viria do backend
+      localStorage.setItem("token", "dev_token_user_1");
+      
       toast({
         title: "Cadastro realizado com sucesso",
         description: `Bem-vindo, ${newUser.name}!`,
@@ -135,14 +147,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     toast({
       title: "Logout realizado",
       description: "Você foi desconectado com sucesso",
     });
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

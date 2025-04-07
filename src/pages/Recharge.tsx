@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -50,10 +49,10 @@ const Recharge = () => {
   };
 
   const handleCreatePayment = async () => {
-    if (!amount || amount < 20) {
+    if (!amount || amount < 1) {
       toast({
         title: "Valor mínimo não atingido",
-        description: "O valor mínimo para recarga é de R$ 20,00",
+        description: "O valor mínimo para recarga é de R$ 1,00",
         variant: "destructive",
       });
       return;
@@ -157,14 +156,14 @@ const Recharge = () => {
                   </div>
                   <Button 
                     onClick={handleCreatePayment}
-                    disabled={!amount || amount < 20 || loading}
+                    disabled={!amount || amount < 1 || loading}
                     className="pix-gradient text-white"
                   >
                     {loading ? "Gerando..." : "Confirmar"}
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Valor mínimo: R$ 20,00
+                  Valor mínimo: R$ 1,00
                 </p>
               </div>
             </div>

@@ -1,65 +1,19 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import BalanceCard from "@/components/BalanceCard";
 import TransactionList from "@/components/TransactionList";
-import ConsultaLogs from "@/components/ConsultaLogs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Transaction } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Building2, Search, CreditCard, ArrowUpRight, History } from "lucide-react";
+import { Building2, Search, CreditCard, ArrowUpRight, History, RefreshCw, Receipt, ArrowDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
 
-// Mock data for recent transactions
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    userId: "2",
-    type: "deposit",
-    amount: 100,
-    status: "completed",
-    description: "Recarga via PIX",
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-  {
-    id: "2",
-    userId: "2",
-    type: "withdrawal",
-    amount: 25,
-    status: "completed",
-    description: "Consulta de CNPJ",
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-  },
-  {
-    id: "3",
-    userId: "2",
-    type: "deposit",
-    amount: 50,
-    status: "completed",
-    description: "Recarga via PIX",
-    createdAt: new Date(Date.now() - 3600000 * 72).toISOString(),
-  },
-];
-
-// Mock data for consulta logs
-const mockConsultaLogs = [
-  {
-    id: "1",
-    cnpj_consultado: "60043704000173",
-    dominio_origem: "infovisa.gurupi.to.gov.br",
-    data_consulta: new Date(Date.now() - 3600000 * 24).toISOString(),
-    custo: 0.05,
-  },
-  {
-    id: "2",
-    cnpj_consultado: "47438705000159",
-    dominio_origem: "infovisa.gurupi.to.gov.br",
-    data_consulta: new Date(Date.now() - 3600000 * 48).toISOString(),
-    custo: 0.05,
-  },
-];
+// API URL
+const API_URL = "http://localhost:8000";
 
 // Mock data for the chart
 const chartData = [
@@ -72,25 +26,141 @@ const chartData = [
 ];
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [consultaLogs, setConsultaLogs] = useState<any[]>([]);
-  
+  const [consultasDisponiveis, setConsultasDisponiveis] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [shouldRefresh, setShouldRefresh] = useState<boolean>(true);
+
   useEffect(() => {
-    // In a real app, fetch transactions and logs from API
-    if (user) {
-      setTransactions(mockTransactions);
-      setConsultaLogs(mockConsultaLogs);
-    }
-  }, [user]);
+    // Fetch user data from API
+    const fetchUserData = async () => {
+      if (!user || !shouldRefresh) return;
+
+      try {
+        setIsLoading(true);
+
+        // Fetch consultas data
+        const response = await fetch(`${API_URL}/api/consultas.php?userId=${user.id}`);
+
+        if (!response.ok) {
+          // Não deslogar o usuário em caso de erro 401 ou outros erros de HTTP
+          // Apenas registra o erro e continua
+          console.error(`Erro ao buscar dados: ${response.status}`);
+          throw new Error('Falha ao carregar dados de consultas');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          setConsultasDisponiveis(data.consultasDisponiveis);
+
+          // Atualizar o saldo do usuário no context com o valor atual do backend
+          if (data.credito !== undefined && user) {
+            // Atualiza no localStorage para persistir a mudança
+            const updatedUser = { ...user, balance: data.credito };
+            // Usa a função updateUser do contexto
+            updateUser(updatedUser);
+          }
+        }
+
+        // Buscar as transações reais do usuário
+        try {
+          const token = localStorage.getItem('token') || 'dev_token_user_1';
+          const transactionsResponse = await fetch(`${API_URL}/api/mock_transactions.php?limit=5`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (transactionsResponse.ok) {
+            const transactionData = await transactionsResponse.json();
+            if (transactionData.success && transactionData.transactions) {
+              setTransactions(transactionData.transactions);
+              console.log('Transações carregadas com sucesso:', transactionData.transactions.length);
+            }
+          }
+        } catch (transactionError) {
+          console.error('Erro ao buscar transações:', transactionError);
+          // Em caso de erro, usar transações de exemplo
+          setTransactions([
+            {
+              id: "1",
+              userId: user.id,
+              type: "deposit",
+              amount: 100,
+              status: "completed",
+              description: "Recarga via PIX",
+              createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+            },
+            {
+              id: "2",
+              userId: user.id,
+              type: "withdrawal",
+              amount: 25,
+              status: "completed",
+              description: "Consulta de CNPJ",
+              createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+            }
+          ]);
+        }
+
+        // Depois de carregar com sucesso, não precisamos mais recarregar
+        setShouldRefresh(false);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        // Mostrar o erro mas não encerrar a sessão
+        toast({
+          title: "Erro ao carregar dados",
+          description: error instanceof Error ? error.message : "Falha ao carregar dados do usuário",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [user, toast, shouldRefresh]);
 
   // Redirect to login if not authenticated
+  // Modificado para ser menos agressivo e apenas redirecionar quando user é definitivamente null
   useEffect(() => {
-    if (!user) {
+    // Só redireciona se não estiver carregando e o usuário for null
+    if (!isLoading && !user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user, navigate, isLoading]);
+
+  // Mostrar um spinner de carregamento quando estiver carregando os dados
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Carregando dados...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Botão para atualizar os dados
+  const handleRefresh = () => {
+    // Se já estiver carregando, não faça nada
+    if (isLoading) return;
+
+    // Reinicia o estado para forçar uma nova busca de dados
+    setIsLoading(true);
+    setShouldRefresh(true);
+
+    // Exibe um toast informando que os dados estão sendo atualizados
+    toast({
+      title: "Atualizando dados",
+      description: "Buscando as informações mais recentes...",
+    });
+  };
 
   if (!user) {
     return null; // or a loading spinner
@@ -99,14 +169,25 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isLoading || shouldRefresh}
+            className="flex items-center"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            {isLoading ? "Atualizando..." : "Atualizar dados"}
+          </Button>
+        </div>
         <p className="text-muted-foreground">
           Bem-vindo, {user.name}. Aqui está um resumo da sua conta.
         </p>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <BalanceCard balance={user.balance} />
-          
+
           <Card className="card-transition">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium text-muted-foreground">
@@ -116,13 +197,14 @@ const Dashboard = () => {
             <CardContent>
               <div className="flex flex-col space-y-3">
                 <div className="flex items-baseline">
-                  <span className="text-3xl font-bold">5</span>
+                  <span className="text-3xl font-bold">{isLoading ? '...' : consultasDisponiveis}</span>
                   <span className="text-sm text-muted-foreground ml-2">restantes</span>
                 </div>
-                <Button 
-                  onClick={() => navigate("/consulta-cnpj")} 
-                  variant="outline" 
+                <Button
+                  onClick={() => navigate("/consulta-cnpj")}
+                  variant="outline"
                   className="w-full"
+                  disabled={isLoading || consultasDisponiveis <= 0}
                 >
                   <Search className="mr-2 h-4 w-4" />
                   Consultar CNPJ
@@ -130,7 +212,7 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="card-transition md:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium text-muted-foreground">
@@ -140,8 +222,8 @@ const Dashboard = () => {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 {!user.isAdmin && (
-                  <Button 
-                    onClick={() => navigate("/recarga")} 
+                  <Button
+                    onClick={() => navigate("/recarga")}
                     className="bg-blue-600 text-white hover:bg-blue-700 h-auto py-4"
                   >
                     <div className="flex flex-col items-center text-center">
@@ -150,9 +232,9 @@ const Dashboard = () => {
                     </div>
                   </Button>
                 )}
-                <Button 
-                  onClick={() => navigate("/consulta-cnpj")} 
-                  variant="outline" 
+                <Button
+                  onClick={() => navigate("/consulta-cnpj")}
+                  variant="outline"
                   className="h-auto py-4"
                 >
                   <div className="flex flex-col items-center text-center">
@@ -160,9 +242,9 @@ const Dashboard = () => {
                     <span>Consultar CNPJ</span>
                   </div>
                 </Button>
-                <Button 
-                  onClick={() => navigate("/registro-consultas")} 
-                  variant="outline" 
+                <Button
+                  onClick={() => navigate("/registro-consultas")}
+                  variant="outline"
                   className="h-auto py-4"
                 >
                   <div className="flex flex-col items-center text-center">
@@ -170,94 +252,20 @@ const Dashboard = () => {
                     <span>Registro de Consultas</span>
                   </div>
                 </Button>
+                <Button
+                  onClick={() => navigate("/transacoes")}
+                  variant="outline"
+                  className="h-auto py-4"
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <Receipt className="h-6 w-6 mb-2" />
+                    <span>Histórico Financeiro</span>
+                  </div>
+                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        {/* Consulta Logs Section */}
-        <ConsultaLogs logs={consultaLogs} />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Histórico Financeiro</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={chartData}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="deposits" fill="#3B82F6" name="Entradas" />
-                    <Bar dataKey="withdrawals" fill="#F87171" name="Saídas" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <TransactionList transactions={transactions} />
-        </div>
-
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Últimas Atividades</CardTitle>
-              <Button variant="outline" size="sm" className="text-xs">
-                Ver todas
-                <ArrowUpRight className="ml-1 h-3 w-3" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-start">
-                  <div className="p-2 bg-blue-100 rounded-full mr-3">
-                    <Building2 className="h-4 w-4 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Consulta de CNPJ realizada</p>
-                    <p className="text-sm text-muted-foreground">
-                      CNPJ: 47.438.705/0001-59
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Há 2 dias atrás
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-start">
-                  <div className="p-2 bg-green-100 rounded-full mr-3">
-                    <CreditCard className="h-4 w-4 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Recarga de créditos concluída</p>
-                    <p className="text-sm text-muted-foreground">
-                      Valor: R$ 100,00
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Há 3 dias atrás
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );

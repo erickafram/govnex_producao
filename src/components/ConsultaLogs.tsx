@@ -1,6 +1,5 @@
-
-import React from "react";
-import { 
+import React, { useState } from "react";
+import {
   Table,
   TableBody,
   TableCaption,
@@ -9,8 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSearch, ExternalLink } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileSearch, ExternalLink, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export interface ConsultaLog {
   id: string;
@@ -25,15 +26,52 @@ interface ConsultaLogsProps {
 }
 
 const ConsultaLogs: React.FC<ConsultaLogsProps> = ({ logs }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  // Limite a quantidade de logs exibidos, a menos que expandido
+  const displayLogs = expanded ? logs : logs.slice(0, 5);
+
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    try {
+      const date = new Date(dateString);
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        // Tentar converter formato MySQL (YYYY-MM-DD HH:MM:SS)
+        const parts = dateString.split(/[- :]/);
+        if (parts.length >= 6) {
+          const mysqlDate = new Date(
+            parseInt(parts[0]),
+            parseInt(parts[1]) - 1,
+            parseInt(parts[2]),
+            parseInt(parts[3]),
+            parseInt(parts[4]),
+            parseInt(parts[5])
+          );
+          if (!isNaN(mysqlDate.getTime())) {
+            return mysqlDate.toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          }
+        }
+        return dateString; // Retornar a string original se não conseguir converter
+      }
+
+      return date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return dateString;
+    }
   };
 
   const formatCNPJ = (cnpj: string) => {
@@ -51,6 +89,12 @@ const ConsultaLogs: React.FC<ConsultaLogsProps> = ({ logs }) => {
             Consultas de CNPJ Realizadas
           </span>
         </CardTitle>
+        {logs.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => navigate("/registro-consultas")}>
+            Ver tudo
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {logs.length === 0 ? (
@@ -74,7 +118,7 @@ const ConsultaLogs: React.FC<ConsultaLogsProps> = ({ logs }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {logs.map((log) => (
+                {displayLogs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="font-medium">{formatCNPJ(log.cnpj_consultado)}</TableCell>
                     <TableCell>
@@ -84,7 +128,7 @@ const ConsultaLogs: React.FC<ConsultaLogsProps> = ({ logs }) => {
                       </div>
                     </TableCell>
                     <TableCell>{formatDate(log.data_consulta)}</TableCell>
-                    <TableCell className="text-right">{log.custo.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{typeof log.custo === 'number' ? log.custo.toFixed(2) : '0.00'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -92,6 +136,14 @@ const ConsultaLogs: React.FC<ConsultaLogsProps> = ({ logs }) => {
           </div>
         )}
       </CardContent>
+      {logs.length > 5 && !expanded && (
+        <CardFooter className="flex justify-center pt-0">
+          <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>
+            Mostrar mais
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };

@@ -8,6 +8,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy API requests to the PHP server
+      '/api': {
+        target: 'http://localhost/react/govnex/pix-credit-nexus', // Apache/PHP server with the correct path
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api') // Keep the /api prefix
+      }
+    }
   },
   plugins: [
     react(),

@@ -350,7 +350,7 @@ const Admin = () => {
                   <h3 className="text-sm font-medium text-muted-foreground">Saldo Total</h3>
                   <DollarSign className="h-4 w-4 text-green-500" />
                 </div>
-                <p className="text-2xl font-bold">R$ {totalUserBalance.toFixed(2)}</p>
+                <p className="text-2xl font-bold">R$ {typeof totalUserBalance === 'number' ? totalUserBalance.toFixed(2) : '0.00'}</p>
                 <p className="text-xs text-muted-foreground">
                   Créditos disponíveis no sistema
                 </p>
@@ -365,7 +365,7 @@ const Admin = () => {
                   <h3 className="text-sm font-medium text-muted-foreground">Pagamentos</h3>
                   <FileText className="h-4 w-4 text-amber-500" />
                 </div>
-                <p className="text-2xl font-bold">R$ {totalDeposits.toFixed(2)}</p>
+                <p className="text-2xl font-bold">R$ {typeof totalDeposits === 'number' ? totalDeposits.toFixed(2) : '0.00'}</p>
                 <p className="text-xs text-muted-foreground">
                   {transactions.filter(t => t.type === "deposit" && t.status === "completed").length} transações concluídas
                 </p>
@@ -380,7 +380,7 @@ const Admin = () => {
                   <h3 className="text-sm font-medium text-muted-foreground">Consultas</h3>
                   <Search className="h-4 w-4 text-purple-500" />
                 </div>
-                <p className="text-2xl font-bold">{totalWithdrawals.toFixed(2)}</p>
+                <p className="text-2xl font-bold">{typeof totalWithdrawals === 'number' ? totalWithdrawals.toFixed(2) : '0.00'}</p>
                 <p className="text-xs text-muted-foreground">
                   {transactions.filter(t => t.type === "withdrawal" && t.status === "completed").length} consultas realizadas
                 </p>
@@ -469,7 +469,7 @@ const Admin = () => {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="font-medium">R$ {u.balance.toFixed(2)}</p>
+                                <p className="font-medium">R$ {typeof u.balance === 'number' ? u.balance.toFixed(2) : '0.00'}</p>
                                 <p className="text-xs text-muted-foreground">
                                   Desde {formatDate(u.createdAt)}
                                 </p>
@@ -550,7 +550,7 @@ const Admin = () => {
                                   transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
                                 }`}>
                                   {transaction.type === 'deposit' ? '+' : '-'} 
-                                  R$ {transaction.amount.toFixed(2)}
+                                  R$ {typeof transaction.amount === 'number' ? transaction.amount.toFixed(2) : '0.00'}
                                 </p>
                                 <Badge className={`
                                   ${transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 

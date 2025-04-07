@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -14,11 +13,13 @@ export interface User {
 export interface Transaction {
   id: string;
   userId: string;
-  type: "deposit" | "withdrawal" | "fee";
+  type: "deposit" | "withdrawal";
   amount: number;
-  status: "pending" | "completed" | "failed" | "expired";
+  status: "pending" | "completed" | "failed";
   description: string;
   createdAt: string;
+  updatedAt?: string;
+  transactionCode?: string;
   pixCode?: string;
   qrCodeUrl?: string;
 }
@@ -56,6 +57,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
+  updateUser: (updatedUser: User) => void;
 }
 
 export interface RegisterData {
@@ -70,8 +72,13 @@ export interface RegisterData {
 export interface ApiToken {
   id: string;
   token: string;
+  description: string | null;
+  userId: string | null;
+  userName?: string | null; // Para exibir o nome do usuário associado
   createdAt: string;
-  isActive: boolean;
+  expiresAt: string | null;
+  is_active: boolean;
+  isActive: boolean; // Alias para is_active, para compatibilidade
 }
 
 export interface ConsultationLog {
