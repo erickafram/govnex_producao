@@ -17,7 +17,7 @@ const Recarga = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [amount, setAmount] = useState<string>("50");
+  const [amount, setAmount] = useState<string>("400");
   const [cpf, setCpf] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -241,7 +241,7 @@ const Recarga = () => {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Valor mínimo: R$ 1,00
+                    Valor mínimo: R$ 400,00
                   </p>
                 </div>
 

@@ -9,8 +9,8 @@ const generateQRCode = (pixCode: string): string => {
 
 export const createPixPayment = async (userId: string, amount: number): Promise<Transaction> => {
   // Validate amount
-  if (amount < 1) {
-    throw new Error("O valor mínimo para recarga é de R$ 1,00");
+  if (amount < 400) {
+    throw new Error("O valor mínimo para recarga é de R$ 400,00");
   }
 
   // Generate a unique transaction ID

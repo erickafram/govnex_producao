@@ -49,10 +49,10 @@ const Recharge = () => {
   };
 
   const handleCreatePayment = async () => {
-    if (!amount || amount < 1) {
+    if (!amount || amount < 400) {
       toast({
         title: "Valor mínimo não atingido",
-        description: "O valor mínimo para recarga é de R$ 1,00",
+        description: "O valor mínimo para recarga é de R$ 400,00",
         variant: "destructive",
       });
       return;
@@ -156,14 +156,14 @@ const Recharge = () => {
                   </div>
                   <Button 
                     onClick={handleCreatePayment}
-                    disabled={!amount || amount < 1 || loading}
+                    disabled={!amount || amount < 400 || loading}
                     className="pix-gradient text-white"
                   >
                     {loading ? "Gerando..." : "Confirmar"}
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Valor mínimo: R$ 1,00
+                  Valor mínimo: R$ 400,00
                 </p>
               </div>
             </div>

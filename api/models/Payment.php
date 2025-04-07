@@ -37,10 +37,10 @@ class Payment
             
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if ($amount < 1.00) {
+            if ($amount < 400.00) {
                 return [
                     'success' => false,
-                    'message' => 'Valor mínimo de R$ 1,00 para recarga'
+                    'message' => 'Valor mínimo de R$ 400,00 para recarga'
                 ];
             }
 
