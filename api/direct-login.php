@@ -45,7 +45,7 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Buscar usuário pelo email
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = :email");
     $stmt->bindParam(':email', $data['email']);
     $stmt->execute();
     
@@ -59,7 +59,7 @@ try {
     }
     
     // Verificar senha
-    if (!password_verify($data['password'], $user['password'])) {
+    if (!password_verify($data['password'], $user['senha'])) {
         http_response_code(401);
         echo json_encode(['error' => 'Credenciais inválidas']);
         exit;
@@ -68,14 +68,11 @@ try {
     // Gerar token JWT (simplificado)
     $token = bin2hex(random_bytes(32));
     
-    // Atualizar token do usuário no banco de dados
-    $stmt = $conn->prepare("UPDATE users SET token = :token WHERE id = :id");
-    $stmt->bindParam(':token', $token);
-    $stmt->bindParam(':id', $user['id']);
-    $stmt->execute();
+    // Não atualizamos o token no banco pois a tabela não tem essa coluna
+    // Apenas mantemos o token na resposta para o frontend
     
     // Remover senha do resultado
-    unset($user['password']);
+    unset($user['senha']);
     
     // Adicionar propriedade isAdmin
     $user['isAdmin'] = ($user['nivel_acesso'] === 'administrador');

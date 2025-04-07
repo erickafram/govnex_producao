@@ -1,0 +1,22 @@
+2025-04-07 17:12:25 - Requisição de login recebida
+2025-04-07 17:12:25 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:12:25 - Erro: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'govnex.users' doesn't exist
+2025-04-07 17:12:38 - Requisição de login recebida
+2025-04-07 17:12:38 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:12:38 - Erro: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'govnex.users' doesn't exist
+2025-04-07 17:13:51 - Requisição de login recebida
+2025-04-07 17:13:51 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:13:52 - Erro: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'govnex.users' doesn't exist
+2025-04-07 17:15:51 - Requisição de login recebida
+2025-04-07 17:15:51 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:15:59 - Requisição de login recebida
+2025-04-07 17:15:59 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:16:50 - Requisição de login recebida
+2025-04-07 17:16:50 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:16:50 - Erro: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'token' in 'field list'
+2025-04-07 17:17:48 - Requisição de login recebida
+2025-04-07 17:17:48 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:17:48 - Login bem-sucedido para: infovisa.gurupi@govnex.site
+2025-04-07 17:17:57 - Requisição de login recebida
+2025-04-07 17:17:57 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-07 17:17:57 - Login bem-sucedido para: infovisa.gurupi@govnex.site
