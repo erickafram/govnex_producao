@@ -2,6 +2,12 @@
 export const CONFIG = {
   itemsPerPage: 10,
   defaultCreditAmount: 50,
+  cors: {
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+  },
 };
 
 // Determinar a URL base da API com base no ambiente
