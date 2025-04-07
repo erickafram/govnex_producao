@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       // Usar a API real para login
-      const apiUrl = getApiUrl('login.php');
+      const apiUrl = getApiUrl('direct-login.php');
       console.log('Tentando login na URL:', apiUrl);
       
       const response = await fetch(apiUrl, {

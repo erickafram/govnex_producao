@@ -8,7 +8,7 @@ header("Access-Control-Allow-Credentials: true");
 
 // Log para depuração
 $logFile = __DIR__ . '/cors_log.txt';
-file_put_contents($logFile, date('Y-m-d H:i:s') . " - Requisição recebida: " . $_SERVER['REQUEST_URI'] . "\n", FILE_APPEND);
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - Requisição recebida: " . $_SERVER['REQUEST_URI'] . " - Método: " . $_SERVER['REQUEST_METHOD'] . "\n", FILE_APPEND);
 
 // Responder imediatamente às solicitações OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -19,16 +19,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Obter o caminho da requisição
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - Caminho da requisição: " . $requestPath . "\n", FILE_APPEND);
 
-// Remover o prefixo /api se existir
+// Verificar se é uma requisição para a API
 if (strpos($requestPath, '/api/') === 0) {
-    $requestPath = substr($requestPath, 4); // Remove "/api"
+    // Remover o prefixo /api
+    $filePath = __DIR__ . substr($requestPath, 4);
+} else {
+    // Caminho relativo dentro da pasta api
+    $filePath = __DIR__ . '/' . ltrim($requestPath, '/');
 }
 
-// Caminho para o arquivo PHP
-$filePath = __DIR__ . '/' . ltrim($requestPath, '/');
-
 file_put_contents($logFile, date('Y-m-d H:i:s') . " - Procurando arquivo: " . $filePath . "\n", FILE_APPEND);
+
+// Listar todos os arquivos na pasta api para debug
+$files = scandir(__DIR__);
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - Arquivos disponíveis: " . implode(", ", $files) . "\n", FILE_APPEND);
 
 // Verificar se o arquivo existe
 if (file_exists($filePath) && is_file($filePath)) {
@@ -37,9 +43,19 @@ if (file_exists($filePath) && is_file($filePath)) {
     // Incluir o arquivo
     include $filePath;
     exit;
+} else {
+    // Tentar encontrar o arquivo diretamente na pasta api
+    $directFile = __DIR__ . '/' . basename($requestPath);
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Tentando arquivo direto: " . $directFile . "\n", FILE_APPEND);
+    
+    if (file_exists($directFile) && is_file($directFile)) {
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Arquivo direto encontrado, incluindo: " . $directFile . "\n", FILE_APPEND);
+        include $directFile;
+        exit;
+    }
 }
 
 // Arquivo não encontrado
 file_put_contents($logFile, date('Y-m-d H:i:s') . " - Arquivo não encontrado: " . $filePath . "\n", FILE_APPEND);
 http_response_code(404);
-echo json_encode(['error' => 'Arquivo não encontrado: ' . $requestPath]);
+echo json_encode(['error' => 'Arquivo não encontrado']);
