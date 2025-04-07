@@ -13,7 +13,8 @@ const getApiBaseUrl = () => {
   
   if (isProduction) {
     // Em produção, precisamos usar a URL completa para a API
-    return 'http://161.35.60.249:8081';
+    // Usando a porta 8000 para o backend PHP
+    return 'http://161.35.60.249:8000';
   }
   
   // Em desenvolvimento, usar o proxy configurado no Vite
@@ -25,11 +26,13 @@ export const API_URL = getApiBaseUrl();
 
 // Função para obter o caminho completo da API
 export const getApiUrl = (endpoint: string) => {
+  const baseUrl = API_URL;
+  
   // Se o endpoint já começar com /api, não adicionar novamente
   if (endpoint.startsWith('/api/')) {
-    return `${API_URL}${endpoint}`;
+    return `${baseUrl}${endpoint}`;
   }
   
   // Caso contrário, adicionar o prefixo /api/
-  return `${API_URL}/api/${endpoint}`;
+  return `${baseUrl}/api/${endpoint}`;
 };

@@ -18,7 +18,8 @@ import {
   Settings,
   DollarSign,
   Globe,
-  Receipt
+  Receipt,
+  ActivitySquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -45,6 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: "Meu Perfil", href: "/perfil", icon: User, requiresAuth: true },
     { name: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Users, requiresAdmin: true },
     { name: "Gerenciar Tokens", href: "/gerenciar-tokens", icon: Key, requiresAdmin: true },
+    { name: "Teste de API", href: "/api-test", icon: ActivitySquare, requiresAdmin: true },
   ];
 
   const handleNavigation = (href: string) => {

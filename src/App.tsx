@@ -18,6 +18,7 @@ import UserManagement from "./pages/UserManagement";
 import TransactionHistory from "./pages/TransactionHistory";
 import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
+import ApiTest from "./pages/ApiTest";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/gerenciar-tokens" element={<TokenManagement />} />
             <Route path="/gerenciar-usuarios" element={<UserManagement />} />
             <Route path="/perfil" element={<UserProfile />} />
+            <Route path="/api-test" element={<ApiTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
