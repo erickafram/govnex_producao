@@ -25,57 +25,26 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, Edit, DollarSign, Globe, Trash, Plus } from "lucide-react";
-import { User } from "@/types";
+import { Search, Shield, Edit, DollarSign, Globe, Trash, Plus, Loader2 } from "lucide-react";
+import { User as BaseUser } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config";
 
-// Updated mock users data with domain fields
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    document: "123.456.789-10",
-    phone: "(11) 99999-9999",
-    domain: null,
-    balance: 1000,
-    isAdmin: true,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
-  },
-  {
-    id: "2",
-    name: "Regular User",
-    email: "user@example.com",
-    document: "987.654.321-00",
-    phone: "(11) 88888-8888",
-    domain: "example.com",
-    balance: 250,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-  },
-  {
-    id: "3",
-    name: "João Silva",
-    email: "joao@example.com",
-    document: "111.222.333-44",
-    phone: "(21) 99999-9999",
-    domain: "joaosilva.com.br",
-    balance: 50,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-  },
-  {
-    id: "4",
-    name: "Maria Oliveira",
-    email: "maria@example.com",
-    document: "444.555.666-77",
-    phone: "(31) 99999-9999",
-    domain: null,
-    balance: 125,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-];
+// Interface estendida para o User com as propriedades que precisamos
+interface User extends BaseUser {
+  document: string;
+  phone?: string;
+  createdAt: string;
+  accessLevel?: string;
+}
+
+// Interface para dados de paginação
+interface PaginationData {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 const UserManagement = () => {
   const { user } = useAuth();
@@ -87,20 +56,73 @@ const UserManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [domainInput, setDomainInput] = useState("");
   const [creditInput, setcreditInput] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [pagination, setPagination] = useState<PaginationData | null>(null);
 
-  // Load mock data
+  // Buscar usuários da API
+  const fetchUsers = async (page = 1) => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token não encontrado");
+      }
+
+      const response = await fetch(`/api/manage_users.php?page=${page}&limit=${itemsPerPage}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar usuários");
+      }
+
+      const data = await response.json();
+      setUsers(data.users);
+      setPagination(data.pagination);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar a lista de usuários",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Carregar usuários ao montar o componente
   useEffect(() => {
-    setUsers(mockUsers);
-  }, []);
+    if (user && user.isAdmin) {
+      fetchUsers(currentPage);
+    }
+  }, [user, currentPage]);
 
   // Redirect if not admin
   useEffect(() => {
-    if (!user || !user.isAdmin) {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    // Verificar se o usuário é administrador
+    const isAdmin = user.isAdmin || user.accessLevel === "administrador";
+    if (!isAdmin) {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar esta página",
+        variant: "destructive"
+      });
       navigate("/dashboard");
     }
-  }, [user, navigate]);
+  }, [user, navigate, toast]);
 
-  if (!user || !user.isAdmin) {
+  // Se o usuário não estiver logado ou não for administrador, não renderiza nada
+  if (!user || !(user.isAdmin || user.accessLevel === "administrador")) {
     return null;
   }
 
@@ -120,25 +142,60 @@ const UserManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!selectedUser) return;
+    
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token não encontrado");
+      }
 
-    const updatedUsers = users.map(u => 
-      u.id === selectedUser.id ? 
-        { 
-          ...u, 
-          domain: domainInput || null,
+      // Chamar a API para atualizar o usuário
+      const response = await fetch(`/api/update_user.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          domain: domainInput,
           balance: parseFloat(creditInput) || 0
-        } : u
-    );
-    
-    setUsers(updatedUsers);
-    setIsDialogOpen(false);
-    
-    toast({
-      title: "Alterações salvas",
-      description: `Dados do usuário ${selectedUser.name} atualizados com sucesso`,
-    });
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao atualizar usuário");
+      }
+      
+      // Atualizar a lista de usuários com os dados atualizados
+      if (data.user) {
+        const updatedUsers = users.map(u => 
+          u.id === selectedUser.id ? data.user : u
+        );
+        setUsers(updatedUsers);
+      } else {
+        // Recarregar a lista de usuários se não recebemos o usuário atualizado
+        fetchUsers(currentPage);
+      }
+      
+      setIsDialogOpen(false);
+      
+      toast({
+        title: "Alterações salvas",
+        description: `Dados do usuário ${selectedUser.name} atualizados com sucesso`,
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Não foi possível atualizar os dados do usuário",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredUsers = users.filter(user => 
@@ -237,6 +294,30 @@ const UserManagement = () => {
                   ))}
                 </TableBody>
               </Table>
+            )}
+            
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center mt-4 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1 || isLoading}
+                >
+                  Anterior
+                </Button>
+                <span className="py-2 px-3 text-sm">
+                  Página {currentPage} de {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.totalPages))}
+                  disabled={currentPage === pagination.totalPages || isLoading}
+                >
+                  Próxima
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

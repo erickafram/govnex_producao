@@ -81,7 +81,7 @@ class Payment
                     "name" => $userData['name']
                 ],
                 "value" => $amount,
-                "callbackUrl" => "http://localhost/react/govnex/pix-credit-nexus/api/webhook_payments.php"
+                "callbackUrl" => "http://localhost/react/govnex/novogovnex/pix-credit-nexus/api/webhook_payments.php"
             ];
 
             try {
@@ -131,7 +131,7 @@ class Payment
 
             return [
                 'success' => true,
-                'qr_code_url' => '/react/govnex/pix-credit-nexus/temp/qrcode_' . $paymentResponse['id'] . '.png',
+                'qr_code_url' => '/react/govnex/novogovnex/pix-credit-nexus/temp/qrcode_' . $paymentResponse['id'] . '.png',
                 'transaction_id' => $paymentResponse['id'],
                 'pix_code' => $paymentResponse['pixCopiaECola']
             ];

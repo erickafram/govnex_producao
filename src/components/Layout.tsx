@@ -37,12 +37,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [open, setOpen] = React.useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requiresAuth: true },
-    { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true, hideForAdmin: true },
-    { name: "Consulta CNPJ", href: "/consulta-cnpj", icon: Building2, requiresAuth: true },
-    { name: "Registro de Consultas", href: "/registro-consultas", icon: History, requiresAuth: true },
-    { name: "Histórico de Transações", href: "/transacoes", icon: Receipt, requiresAuth: true },
     { name: "Painel Admin", href: "/admin", icon: Shield, requiresAdmin: true },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requiresAuth: true, hideForAdmin: true },
+    { name: "Recarga", href: "/recarga", icon: CreditCard, requiresAuth: true, hideForAdmin: true },
+    { name: "Registro de Consultas", href: "/registro-consultas", icon: History, requiresAuth: true, hideForAdmin: true },
+    { name: "Histórico de Transações", href: "/transacoes", icon: Receipt, requiresAuth: true },
+    { name: "Meu Perfil", href: "/perfil", icon: User, requiresAuth: true },
     { name: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Users, requiresAdmin: true },
     { name: "Gerenciar Tokens", href: "/gerenciar-tokens", icon: Key, requiresAdmin: true },
   ];

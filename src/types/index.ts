@@ -4,10 +4,12 @@ export interface User {
   email: string;
   document: string; // CPF or CNPJ
   phone?: string;
-  domain?: string;
+  domain?: string | null;
   balance: number;
   isAdmin: boolean;
   createdAt: string;
+  accessLevel?: string;
+  token?: string; // Token de autenticação
 }
 
 export interface Transaction {
@@ -54,7 +56,7 @@ export interface CNPJData {
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   updateUser: (updatedUser: User) => void;
@@ -74,6 +76,7 @@ export interface ApiToken {
   token: string;
   description: string | null;
   userId: string | null;
+  user_id?: string | null; // Campo original do backend
   userName?: string | null; // Para exibir o nome do usuário associado
   createdAt: string;
   expiresAt: string | null;
@@ -83,18 +86,23 @@ export interface ApiToken {
 
 export interface ConsultationLog {
   id: string;
-  cnpjConsultado: string;
-  dominioOrigem: string;
-  dataConsulta: string;
-  custo: number;
+  cnpj: string;
+  domain: string;
+  date: string;
+  cost: number;
+  userId?: string;
+  userName?: string;
+  document?: string;
+  phone?: string;
 }
 
 export interface Payment {
   id: string;
   userId: string;
-  valor: number;
-  status: "pendente" | "pago" | "cancelado";
-  codigoTransacao: string;
-  dataCriacao: string;
-  dataAtualizacao: string;
+  userName?: string;
+  amount: number;
+  status: string;
+  transactionCode: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -39,9 +39,12 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $tokens = [];
         $stmt = $db->query("
-            SELECT id, token, description, user_id, created_at, expires_at, is_active 
-            FROM api_tokens 
-            ORDER BY created_at DESC
+            SELECT t.id, t.token, t.description, t.user_id, 
+                   u.nome as user_name, 
+                   t.created_at, t.expires_at, t.is_active 
+            FROM api_tokens t
+            LEFT JOIN usuarios u ON t.user_id = u.id 
+            ORDER BY t.created_at DESC
         ");
         
         if ($stmt !== false) {
@@ -52,6 +55,8 @@ try {
                 // Garantir que is_active seja um booleano real (1/0 => true/false)
                 $token['is_active'] = $token['is_active'] == 1;
                 $token['user_id'] = $token['user_id'] ? (string)$token['user_id'] : null;
+                $token['userName'] = $token['user_name'] ?? null;
+                unset($token['user_name']); // Remover campo duplicado
             }
         }
         

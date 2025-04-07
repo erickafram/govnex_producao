@@ -41,8 +41,13 @@ const Login = () => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
-      navigate("/dashboard");
+      const user = await login(data.email, data.password);
+      // Redirecionar com base no nível de acesso do usuário
+      if (user && (user.isAdmin || user.accessLevel === 'admin')) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       // Error handling is done in the AuthContext
       console.error("Login error:", error);
@@ -113,14 +118,6 @@ const Login = () => {
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm">
-            <p>
-              Demonstração: Login como usuário comum: user@example.com / password
-            </p>
-            <p className="mt-1">
-              Login como administrador: admin@example.com / password
-            </p>
-          </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">

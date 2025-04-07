@@ -3,7 +3,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { Transaction, User } from "@/types";
+import { Transaction, User, ConsultationLog, Payment } from "@/types";
+import { AdminStats, RecentData, PaginationData } from "@/types/admin";
+import { API_URL, CONFIG } from "@/config";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -22,160 +24,13 @@ import {
   Settings, 
   DollarSign, 
   BarChart4, 
-  FileText 
+  FileText,
+  Loader2
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
-// Mock users data
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    document: "123.456.789-10",
-    phone: "(11) 99999-9999",
-    domain: null,
-    balance: 1000,
-    isAdmin: true,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
-  },
-  {
-    id: "2",
-    name: "Regular User",
-    email: "user@example.com",
-    document: "987.654.321-00",
-    phone: "(11) 88888-8888",
-    domain: "example.com",
-    balance: 250,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-  },
-  {
-    id: "3",
-    name: "João Silva",
-    email: "joao@example.com",
-    document: "111.222.333-44",
-    phone: "(21) 99999-9999",
-    domain: "joaosilva.com.br",
-    balance: 50,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-  },
-  {
-    id: "4",
-    name: "Maria Oliveira",
-    email: "maria@example.com",
-    document: "444.555.666-77",
-    phone: "(31) 99999-9999",
-    domain: null,
-    balance: 125,
-    isAdmin: false,
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-];
-
-// Mock transactions data
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    userId: "2",
-    type: "deposit",
-    amount: 100,
-    status: "completed",
-    description: "Recarga via PIX",
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-  {
-    id: "2",
-    userId: "2",
-    type: "withdrawal",
-    amount: 25,
-    status: "completed",
-    description: "Consulta de CNPJ",
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-  },
-  {
-    id: "3",
-    userId: "3",
-    type: "deposit",
-    amount: 50,
-    status: "completed",
-    description: "Recarga via PIX",
-    createdAt: new Date(Date.now() - 3600000 * 72).toISOString(),
-  },
-  {
-    id: "4",
-    userId: "4",
-    type: "deposit",
-    amount: 200,
-    status: "completed",
-    description: "Recarga via PIX",
-    createdAt: new Date(Date.now() - 3600000 * 96).toISOString(),
-  },
-  {
-    id: "5",
-    userId: "4",
-    type: "withdrawal",
-    amount: 75,
-    status: "completed",
-    description: "Consulta de CNPJ",
-    createdAt: new Date(Date.now() - 3600000 * 120).toISOString(),
-  },
-  {
-    id: "6",
-    userId: "3",
-    type: "deposit",
-    amount: 100,
-    status: "pending",
-    description: "Recarga via PIX",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-// Mock logs data
-const mockLogs = [
-  {
-    id: "1",
-    userId: "2",
-    action: "login",
-    details: "Login bem-sucedido",
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    ip: "192.168.1.1",
-  },
-  {
-    id: "2",
-    userId: "3",
-    action: "cnpj_query",
-    details: "Consulta CNPJ: 12.345.678/0001-90",
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-    ip: "192.168.1.2",
-  },
-  {
-    id: "3",
-    userId: "4",
-    action: "payment",
-    details: "Pagamento de R$ 200,00 recebido",
-    timestamp: new Date(Date.now() - 3600000 * 3).toISOString(),
-    ip: "192.168.1.3",
-  },
-  {
-    id: "4",
-    userId: "2",
-    action: "cnpj_query",
-    details: "Consulta CNPJ: 98.765.432/0001-21",
-    timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
-    ip: "192.168.1.1",
-  },
-  {
-    id: "5",
-    userId: "1",
-    action: "admin",
-    details: "Acesso ao painel de administração",
-    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-    ip: "192.168.1.4",
-  },
-];
+// Admin quick actions
 
 // Admin quick actions
 const adminActions = [

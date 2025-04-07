@@ -11,10 +11,12 @@ import Dashboard from "./pages/Dashboard";
 import Recarga from "./pages/Recarga";
 import CNPJConsult from "./pages/CNPJConsult";
 import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/AdminDashboard";
 import RegistroConsultas from "./pages/RegistroConsultas";
 import TokenManagement from "./pages/TokenManagement";
 import UserManagement from "./pages/UserManagement";
 import TransactionHistory from "./pages/TransactionHistory";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,9 +37,10 @@ const App = () => (
             <Route path="/consulta-cnpj" element={<CNPJConsult />} />
             <Route path="/registro-consultas" element={<RegistroConsultas />} />
             <Route path="/transacoes" element={<TransactionHistory />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/gerenciar-tokens" element={<TokenManagement />} />
             <Route path="/gerenciar-usuarios" element={<UserManagement />} />
+            <Route path="/perfil" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

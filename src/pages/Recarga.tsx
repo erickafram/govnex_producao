@@ -26,6 +26,8 @@ const Recarga = () => {
   const [checkingStatus, setCheckingStatus] = useState<boolean>(false);
   const [statusInterval, setStatusInterval] = useState<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<number>(120); // 2 minutos em segundos
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Pre-fill name if user is logged in
@@ -40,8 +42,37 @@ const Recarga = () => {
       if (statusInterval) {
         clearInterval(statusInterval);
       }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
     };
-  }, [statusInterval]);
+  }, [statusInterval, timerInterval]);
+  
+  // Efeito para atualizar o temporizador
+  useEffect(() => {
+    if (paymentData && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            // Expirar o QR code quando o tempo acabar
+            toast({
+              title: "QR Code expirado",
+              description: "O tempo para pagamento expirou. Gere um novo QR code.",
+              variant: "destructive",
+            });
+            resetForm(); // Resetar o formulário para gerar um novo QR code
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      setTimerInterval(timer);
+      
+      return () => clearInterval(timer);
+    }
+  }, [paymentData]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers
@@ -119,8 +150,9 @@ const Recarga = () => {
     try {
       setCheckingStatus(true);
       const token = localStorage.getItem("token");
+      console.log(`Verificando status do pagamento: ${API_URL}/check_payment.php?transaction_id=${transactionId}`);
       const response = await fetch(
-        `${API_URL}/check_payment_status.php?transaction_id=${transactionId}`,
+        `${API_URL}/check_payment.php?transaction_id=${transactionId}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -137,8 +169,9 @@ const Recarga = () => {
       }
 
       const data = await response.json();
+      console.log('Resposta da verificação de pagamento:', data);
       
-      if (data.success && data.status === "pago") {
+      if (data.success && data.payment && data.payment.status === "pago") {
         // Payment confirmed
         toast({
           title: "Pagamento confirmado!",
@@ -306,11 +339,19 @@ const Recarga = () => {
                   <p className="text-sm text-muted-foreground">
                     O pagamento será processado automaticamente
                   </p>
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p className="text-sm font-medium text-yellow-700">
+                      Tempo restante: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                    </p>
+                    <p className="text-xs text-yellow-600">
+                      Este QR code expira em 2 minutos
+                    </p>
+                  </div>
                 </div>
 
                 <div className="border p-4 rounded-lg mb-4">
                   <img
-                    src={`http://localhost${paymentData.qr_code_url}`}
+                    src={`/temp/qrcode_${paymentData.transaction_id}.png`}
                     alt="QR Code PIX"
                     className="w-64 h-64 mx-auto"
                   />

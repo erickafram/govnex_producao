@@ -35,9 +35,10 @@ import {
   RefreshCw,
   Trash2,
   Calendar,
-  User
+  User,
+  Search
 } from "lucide-react";
-import { ApiToken } from "@/types";
+import { ApiToken, User as UserType } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { format, parseISO, isValid, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -50,7 +51,9 @@ const TokenManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [tokens, setTokens] = useState<ApiToken[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showNewTokenDialog, setShowNewTokenDialog] = useState(false);
@@ -62,13 +65,41 @@ const TokenManagement = () => {
   const [newGeneratedToken, setNewGeneratedToken] = useState("");
   const dialogCloseRef = useRef<HTMLButtonElement>(null);
 
-  // Carregar tokens do backend
+  // Carregar tokens e usuários do backend
   useEffect(() => {
     if (!user || !user.isAdmin) {
       navigate("/dashboard");
       return;
     }
 
+    // Buscar lista de usuários
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      try {
+        const response = await fetch(`/api/get_users_list.php`);
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar usuários: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setUsers(data.users || []);
+        } else {
+          throw new Error(data.error || 'Erro ao buscar usuários');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+        toast({
+          title: "Erro ao carregar usuários",
+          description: error instanceof Error ? error.message : "Falha ao carregar dados de usuários",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    // Buscar tokens
     const fetchTokens = async () => {
       setIsLoading(true);
       try {
@@ -162,6 +193,7 @@ const TokenManagement = () => {
     };
 
     fetchTokens();
+    fetchUsers();
   }, [user, navigate, toast]);
 
   if (!user || !user.isAdmin) {
@@ -415,12 +447,24 @@ const TokenManagement = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="userId">Associar ao Usuário (opcional)</Label>
-                    <Input
-                      id="userId"
-                      placeholder="ID do usuário"
-                      value={newTokenData.userId}
-                      onChange={(e) => setNewTokenData({ ...newTokenData, userId: e.target.value })}
-                    />
+                    <div className="relative">
+                      <select
+                        id="userId"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={newTokenData.userId}
+                        onChange={(e) => setNewTokenData({ ...newTokenData, userId: e.target.value })}
+                      >
+                        <option value="">Selecione um usuário</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.name} ({user.email})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
                   </div>
 
                   <DialogFooter>
@@ -478,6 +522,7 @@ const TokenManagement = () => {
                   <TableRow>
                     <TableHead>Token</TableHead>
                     <TableHead>Descrição</TableHead>
+                    <TableHead>Usuário</TableHead>
                     <TableHead>Criado em</TableHead>
                     <TableHead>Expira em</TableHead>
                     <TableHead>Status</TableHead>
@@ -492,6 +537,16 @@ const TokenManagement = () => {
                       </TableCell>
                       <TableCell>
                         {token.description || <span className="text-muted-foreground italic">Sem descrição</span>}
+                      </TableCell>
+                      <TableCell>
+                        {token.userName ? (
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            <span>{token.userName}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground italic">Não associado</span>
+                        )}
                       </TableCell>
                       <TableCell>{formatDate(token.createdAt)}</TableCell>
                       <TableCell>

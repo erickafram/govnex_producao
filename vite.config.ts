@@ -7,14 +7,20 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
     proxy: {
       // Proxy API requests to the PHP server
       '/api': {
-        target: 'http://localhost/react/govnex/pix-credit-nexus', // Apache/PHP server with the correct path
+        target: 'http://localhost/react/govnex/novogovnex/pix-credit-nexus', // Caminho correto para o servidor Apache/PHP
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api') // Keep the /api prefix
+        rewrite: (path) => path.replace(/^\/api/, '/api') // Mantém o prefixo /api
+      },
+      // Proxy para a pasta temp (QR codes)
+      '/temp': {
+        target: 'http://localhost/react/govnex/novogovnex/pix-credit-nexus',
+        changeOrigin: true,
+        secure: false
       }
     }
   },

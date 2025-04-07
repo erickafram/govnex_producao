@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../conf/db_connection.php';
 $allowedOrigins = [
     'https://govnex.site',
     'https://infovisa.gurupi.to.gov.br',
-    'http://localhost:8080',
+    'http://localhost:8081',
     'http://localhost:3000'
 ];
 

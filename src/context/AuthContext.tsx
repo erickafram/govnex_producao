@@ -1,6 +1,25 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { AuthContextType, User, RegisterData } from "@/types";
+import { User } from "@/types";
+
+// Definindo as interfaces necessárias localmente
+interface RegisterData {
+  name: string;
+  email: string;
+  document: string;
+  phone: string;
+  domain?: string;
+  password: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<any>;
+  register: (userData: RegisterData) => Promise<void>;
+  logout: () => void;
+  updateUser: (updatedUser: User) => void;
+}
 
 // API URL - Using empty base URL for proxy
 const API_URL = "";
@@ -64,25 +83,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
+      try {
+        const storedUser = localStorage.getItem("user");
+        const storedToken = localStorage.getItem("token");
 
-      if (storedUser && storedToken) {
-        try {
-          setUser(JSON.parse(storedUser));
-          console.log("Usuário autenticado carregado do localStorage");
-        } catch (error) {
-          console.error("Erro ao carregar usuário do localStorage:", error);
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
+        // Verificar se existe um usuário e token armazenados
+        if (storedUser && storedToken) {
+          try {
+            // Tentar analisar o usuário armazenado
+            const parsedUser = JSON.parse(storedUser);
+            
+            // Garantir que o usuário tenha todas as propriedades necessárias
+            if (parsedUser && parsedUser.id) {
+              console.log("Usuário autenticado carregado do localStorage");
+              
+              // Garantir que a propriedade isAdmin esteja correta
+              parsedUser.isAdmin = parsedUser.isAdmin || parsedUser.accessLevel === "administrador";
+              
+              setUser(parsedUser);
+              return; // Sair da função se o usuário foi carregado com sucesso
+            }
+          } catch (error) {
+            console.error("Erro ao carregar usuário do localStorage:", error);
+          }
         }
-      } else {
-        // For development, set a default token
-        console.log("Definindo token de desenvolvimento");
-        localStorage.setItem("token", "dev_token_user_1");
+        
+        // Se chegou aqui, significa que não há usuário válido ou token
+        // Apenas definir o estado como não carregando
+        console.log("Nenhum usuário autenticado encontrado");
+        setUser(null);
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     checkAuth();
@@ -91,12 +125,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const userData = await apiLogin(email, password);
+      // Usar a API real para login
+      const response = await fetch(`/api/login.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Falha ao fazer login");
+      }
+      
+      // Garantir que o usuário tenha a propriedade isAdmin baseada no nivel_acesso
+      const userData = data.user;
+      userData.isAdmin = userData.isAdmin || userData.accessLevel === "administrador";
+      
+      // Gerar um token simples (em produção, isso viria do backend)
+      const token = `token_${userData.id}_${Date.now()}`;
+      userData.token = token;
+      
       setUser(userData);
       
       // Store user data and token in localStorage
       localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("token", userData.token || "dev_token_user_1");
+      localStorage.setItem("token", token);
       
       toast({
         title: "Login realizado com sucesso",
