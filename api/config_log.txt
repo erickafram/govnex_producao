@@ -1,0 +1,6 @@
+2025-04-07 17:45:55 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env
+2025-04-07 17:46:09 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env
+2025-04-07 17:47:40 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env
+2025-04-07 18:04:18 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env
+2025-04-07 18:15:25 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env
+2025-04-07 18:27:49 - Ambiente: Desenvolvimento, Arquivo: /var/www/html/pix-credit-nexus/api/../.env

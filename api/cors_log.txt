@@ -1,0 +1,4 @@
+2025-04-07 17:10:45 - Iniciando servidor CORS na porta 8000
+2025-04-07 17:10:45 - Arquivo .htaccess criado
+2025-04-07 17:10:45 - Arquivo router.php criado
+2025-04-07 17:10:45 - Executando comando: php -S 0.0.0.0:8000 -t /var/www/html/pix-credit-nexus/api /var/www/html/pix-credit-nexus/api/router.php

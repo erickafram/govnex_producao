@@ -16,3 +16,7 @@
 2025-04-07 17:20:34 - Conexão com o banco de dados estabelecida com sucesso
 2025-04-07 17:20:39 - Ambiente: Desenvolvimento
 2025-04-07 17:20:39 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-07 18:29:54 - Ambiente: Desenvolvimento
+2025-04-07 18:29:54 - Erro de conexão: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+2025-04-07 18:34:42 - Ambiente: Desenvolvimento
+2025-04-07 18:34:42 - Erro de conexão: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)

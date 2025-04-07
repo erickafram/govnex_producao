@@ -11,7 +11,7 @@ function getDbConfig() {
             'host' => 'localhost',  // Usually 'localhost' even in production
             'dbname' => 'govnex',   // Database name in production
             'username' => 'govnex', // Production username (adjust as needed)
-            'password' => 'govnex@2023' // Production password (adjust as needed)
+            'password' => '@@2025@@Ekb' // Production password (adjust as needed)
         ];
     } else {
         // Local development database configuration
