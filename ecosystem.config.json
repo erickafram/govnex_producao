@@ -1,0 +1,21 @@
+{
+  "apps": [
+    {
+      "name": "pix-frontend",
+      "script": "npm",
+      "args": "run dev",
+      "cwd": "/var/www/html/pix-credit-nexus",
+      "watch": false,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "pix-api",
+      "script": "php",
+      "args": "-S 0.0.0.0:8000 -t api",
+      "cwd": "/var/www/html/pix-credit-nexus",
+      "watch": false
+    }
+  ]
+}
