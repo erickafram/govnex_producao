@@ -53,7 +53,7 @@ fi
 echo ""
 echo "=== AMBIENTE DE PRODUÇÃO INICIADO ==="
 echo "API: http://161.35.60.249:8000"
-echo "Frontend: http://161.35.60.249:8082"
+echo "Frontend: http://161.35.60.249:8081"
 echo ""
 echo "Logs:"
 echo "- API: $PROJECT_DIR/php_server.log"
