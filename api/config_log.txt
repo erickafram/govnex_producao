@@ -128,3 +128,8 @@
 2025-04-07 23:39:39 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
 2025-04-07 23:39:39 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
 2025-04-07 23:39:39 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
+2025-04-07 23:50:33 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
+2025-04-07 23:50:33 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
+2025-04-07 23:50:33 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
+2025-04-07 23:50:33 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env
+2025-04-07 23:50:33 - Ambiente: Desenvolvimento, Arquivo: C:\wamp\www\react\govnex\pix-credit-nexus\api/../.env

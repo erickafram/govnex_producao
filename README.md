@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PIX Credit Nexus
 
 Sistema de gerenciamento de créditos PIX com consulta de CNPJ.
@@ -22,7 +23,7 @@ npm run dev:all
 
 Isso iniciará:
 
-- Frontend React em: http://localhost:8080
+- Frontend React em: http://localhost:8081
 - Backend PHP em: http://localhost:8000
 
 ## Credenciais de teste
@@ -57,3 +58,6 @@ Isso iniciará:
 - Consulta de CNPJ
 - Registro de consultas
 - Painel administrativo
+=======
+# govnex
+>>>>>>> 9bbce1bbc22ff7b5a3a206768dc2d074457933e4
