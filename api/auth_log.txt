@@ -231,3 +231,4 @@ Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
 Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
 Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+2025-04-07 16:43:53 - Login request received

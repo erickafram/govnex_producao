@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/controllers/UserController.php';
+require_once 'cors.php';
 
 // Habilitar CORS para permitir requisições de diferentes origens
 header("Access-Control-Allow-Origin: *");
