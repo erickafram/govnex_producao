@@ -2,6 +2,13 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/controllers/UserController.php';
 
+// Habilitar CORS para permitir requisições de diferentes origens
+enableCors();
+
+// Log para depuração
+$logFile = __DIR__ . '/auth_log.txt';
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - Login request received\n", FILE_APPEND);
+
 // Criar instância do controller
 $userController = new UserController();
 

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { User, Save, Key, RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getApiUrl } from "@/config";
 
 const UserProfile = () => {
   const { user, updateUser } = useAuth();
@@ -63,7 +64,7 @@ const UserProfile = () => {
         throw new Error("Token não encontrado");
       }
       
-      const response = await fetch("/api/update_profile.php", {
+      const response = await fetch(getApiUrl('update_profile.php'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +140,7 @@ const UserProfile = () => {
         throw new Error("Token não encontrado");
       }
       
-      const response = await fetch("/api/update_password.php", {
+      const response = await fetch(getApiUrl('update_password.php'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

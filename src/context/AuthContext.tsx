@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { User } from "@/types";
+import { getApiUrl } from "@/config";
 
 // Definindo as interfaces necessárias localmente
 interface RegisterData {
@@ -126,7 +127,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       // Usar a API real para login
-      const response = await fetch(`/api/login.php`, {
+      const apiUrl = getApiUrl('login.php');
+      console.log('Tentando login na URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -134,7 +138,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Resposta do servidor:', response.status);
+      
       const data = await response.json();
+      console.log('Dados recebidos:', data);
 
       if (!response.ok) {
         throw new Error(data.error || "Falha ao fazer login");

@@ -42,9 +42,10 @@ import { ApiToken, User as UserType } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { format, parseISO, isValid, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getApiUrl } from "@/config";
 
 // API URL
-const API_URL = "http://localhost:8000";
+const API_URL = getApiUrl('');
 
 const TokenManagement = () => {
   const { user } = useAuth();
@@ -76,7 +77,7 @@ const TokenManagement = () => {
     const fetchUsers = async () => {
       setIsLoadingUsers(true);
       try {
-        const response = await fetch(`/api/get_users_list.php`);
+        const response = await fetch(getApiUrl('get_users_list.php'));
         if (!response.ok) {
           throw new Error(`Falha ao carregar usuários: ${response.status}`);
         }
@@ -104,7 +105,7 @@ const TokenManagement = () => {
       setIsLoading(true);
       try {
         console.log('Iniciando requisição para API de tokens');
-        const response = await fetch(`${API_URL}/api/tokens.php`);
+        const response = await fetch(getApiUrl('tokens.php'));
         console.log('Resposta recebida:', response.status);
 
         if (!response.ok) {
@@ -140,7 +141,7 @@ const TokenManagement = () => {
 
         // Tentar usar o endpoint simplificado como fallback
         try {
-          const fallbackResponse = await fetch(`${API_URL}/api/generate-token.php`);
+          const fallbackResponse = await fetch(getApiUrl('generate-token.php'));
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
 
@@ -231,7 +232,7 @@ const TokenManagement = () => {
         ? new Date(newTokenData.expiresAt).toISOString()
         : null;
 
-      const response = await fetch(`${API_URL}/api/tokens.php`, {
+      const response = await fetch(getApiUrl('tokens.php'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -285,7 +286,7 @@ const TokenManagement = () => {
       const currentStatus = token.is_active !== undefined ? token.is_active : token.isActive;
       const newStatus = !currentStatus;
 
-      const response = await fetch(`${API_URL}/api/tokens.php?id=${id}`, {
+      const response = await fetch(getApiUrl(`tokens.php?id=${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
