@@ -13,9 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-
-// API URL
-const API_URL = "http://localhost:8000";
+import { API_URL } from "@/config";
 
 // Mock data for the chart
 const chartData = [
@@ -43,35 +41,70 @@ const Dashboard = () => {
 
       try {
         setIsLoading(true);
+        console.log("Dashboard: Iniciando fetchUserData para usuário:", user);
+        console.log("Dashboard: Domínio do usuário:", user.domain);
 
-        // Fetch consultas data
-        const response = await fetch(`${API_URL}/api/consultas.php?userId=${user.id}`);
+        // Adicionar o domínio do usuário como parâmetro adicional
+        const apiUrl = `/api/consultas.php?userId=${user.id}&dominio=${user.domain || ''}`;
+        console.log(`Dashboard: Buscando dados em ${apiUrl}`);
+        
+        // Adicionar cabeçalhos de autenticação
+        const token = localStorage.getItem('token') || '';
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        console.log("Dashboard: Status da resposta:", response.status);
 
         if (!response.ok) {
           // Não deslogar o usuário em caso de erro 401 ou outros erros de HTTP
           // Apenas registra o erro e continua
           console.error(`Erro ao buscar dados: ${response.status}`);
+          const errorText = await response.text();
+          console.error("Conteúdo da resposta de erro:", errorText);
           throw new Error('Falha ao carregar dados de consultas');
         }
 
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log("Dashboard: Texto da resposta:", responseText);
+        
+        // Tentar fazer o parse do JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log("Dashboard: Dados JSON parseados:", data);
+        } catch (parseError) {
+          console.error("Erro ao fazer parse do JSON:", parseError);
+          throw new Error('Resposta inválida do servidor');
+        }
 
         if (data.success) {
+          console.log("Dashboard: Consultas disponíveis:", data.consultasDisponiveis);
           setConsultasDisponiveis(data.consultasDisponiveis);
 
           // Atualizar o saldo do usuário no context com o valor atual do backend
           if (data.credito !== undefined && user) {
+            console.log("Dashboard: Atualizando saldo do usuário:", data.credito);
             // Atualiza no localStorage para persistir a mudança
             const updatedUser = { ...user, balance: data.credito };
             // Usa a função updateUser do contexto
             updateUser(updatedUser);
           }
+        } else {
+          console.error("Dashboard: Resposta sem sucesso:", data);
+          // Se a API retornou uma resposta sem sucesso, usar valores padrão
+          setConsultasDisponiveis(0);
         }
 
         // Buscar as transações reais do usuário
         try {
           const token = localStorage.getItem('token') || 'dev_token_user_1';
-          const transactionsResponse = await fetch(`${API_URL}/api/mock_transactions.php?limit=5`, {
+          console.log("Dashboard: Buscando transações em /api/mock_transactions.php?limit=5");
+          const transactionsResponse = await fetch(`/api/mock_transactions.php?limit=5`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -80,8 +113,8 @@ const Dashboard = () => {
           if (transactionsResponse.ok) {
             const transactionData = await transactionsResponse.json();
             if (transactionData.success && transactionData.transactions) {
+              console.log("Dashboard: Transações carregadas com sucesso:", transactionData.transactions.length);
               setTransactions(transactionData.transactions);
-              console.log('Transações carregadas com sucesso:', transactionData.transactions.length);
             }
           }
         } catch (transactionError) {

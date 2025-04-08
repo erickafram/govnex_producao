@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/controllers/ConsultaController.php';
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 // Configurações de CORS
 header("Access-Control-Allow-Origin: *");

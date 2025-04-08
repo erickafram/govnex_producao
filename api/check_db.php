@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 // Verificar conexão com o banco de dados
 try {

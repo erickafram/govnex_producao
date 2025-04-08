@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 // Função para adicionar usuário de demonstração
 function addDemoUser($db, $userData)

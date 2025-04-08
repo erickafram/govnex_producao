@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db_config.php'; // Corrigido: removido as aspas extras e ajustado o caminho
 
 class Consulta
 {
@@ -148,7 +148,7 @@ class Consulta
                 $query .= " LIMIT :limit";
             }
             
-            $stmt = $this->conn->prepare($query);
+            $stmt = $this->db->prepare($query);
             
             if ($limit > 0) {
                 $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);

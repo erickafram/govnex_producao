@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db_config.php'; // Corrigido: removido as aspas extras e ajustado o caminho
 
 class ApiToken
 {

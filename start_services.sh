@@ -17,7 +17,8 @@ trap cleanup SIGINT SIGTERM
 # Iniciar o servidor PHP
 cd $PROJECT_DIR
 echo "Iniciando servidor PHP na porta 8000..."
-php -S 0.0.0.0:8000 -t api > php_server.log 2>&1 &
+php -S 0.0.0.0:8000 -t api api/router.php > php_server.log 2>&1 &
+
 BACKEND_PID=$!
 
 # Iniciar o frontend

@@ -1,7 +1,7 @@
 <?php
 // Script para inicializar a tabela de pagamentos
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 // Conectar ao banco de dados
 try {

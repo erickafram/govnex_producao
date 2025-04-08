@@ -1,7 +1,7 @@
 <?php
 // Script para adicionar alguns pagamentos de exemplo para o usuário 1
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 try {
     $db = getDbConnection();

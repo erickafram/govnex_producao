@@ -1,7 +1,7 @@
 <?php
 // Script para verificar a tabela de sessões
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 try {
     $db = getDbConnection();

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db_config.php'; // Corrigido: removido as aspas extras e ajustado o caminho
 
 class User
 {
@@ -77,6 +77,8 @@ class User
     public function getById($id)
     {
         try {
+            error_log("User.getById: Buscando usuário com ID $id");
+            
             $stmt = $this->db->prepare("
                 SELECT 
                     id, 
@@ -98,9 +100,11 @@ class User
             if ($user) {
                 // Converter isAdmin para booleano
                 $user['isAdmin'] = (bool)$user['isAdmin'];
+                error_log("User.getById: Usuário encontrado: " . json_encode($user));
                 return $user;
             }
 
+            error_log("User.getById: Usuário não encontrado com ID $id");
             return false;
         } catch (PDOException $e) {
             error_log("Erro ao buscar usuário: " . $e->getMessage());

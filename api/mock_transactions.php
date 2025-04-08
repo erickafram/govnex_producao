@@ -2,7 +2,7 @@
 // Este arquivo fornece um endpoint para transações,
 // tenta buscar dados reais e usa dados de exemplo como fallback
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config.php'; // Corrigido: incluir config.php para funções auxiliares
 require_once __DIR__ . '/middleware/auth.php';
 
 // Configurar cabeçalhos para JSON e CORS

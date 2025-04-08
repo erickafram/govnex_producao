@@ -62,3 +62,42 @@
 2025-04-07 23:38:09 - Requisição de login recebida
 2025-04-07 23:38:09 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
 2025-04-07 23:38:09 - Login bem-sucedido para: infovisa.gurupi@govnex.site
+2025-04-08 01:22:19 - Requisição de login recebida
+2025-04-08 01:22:19 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:19 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:22:20 - Requisição de login recebida
+2025-04-08 01:22:20 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:20 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:22:20 - Requisição de login recebida
+2025-04-08 01:22:20 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:20 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:22:21 - Requisição de login recebida
+2025-04-08 01:22:21 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:21 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:22:21 - Requisição de login recebida
+2025-04-08 01:22:21 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:21 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:22:21 - Requisição de login recebida
+2025-04-08 01:22:21 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:22:21 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:24:00 - Requisição de login recebida
+2025-04-08 01:24:00 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:24:00 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:25:23 - Requisição de login recebida
+2025-04-08 01:25:23 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:25:23 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:25:24 - Requisição de login recebida
+2025-04-08 01:25:24 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:25:24 - Erro: Falha na conexão com o banco de dados
+2025-04-08 01:37:17 - Requisição de login recebida
+2025-04-08 01:37:17 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 01:37:17 - Login bem-sucedido para: infovisa.gurupi@govnex.site
+2025-04-08 02:38:02 - Requisição de login recebida
+2025-04-08 02:38:02 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 02:38:02 - Login bem-sucedido para: infovisa.gurupi@govnex.site
+2025-04-08 02:41:36 - Requisição de login recebida
+2025-04-08 02:41:36 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 02:41:36 - Login bem-sucedido para: infovisa.gurupi@govnex.site
+2025-04-08 02:44:21 - Requisição de login recebida
+2025-04-08 02:44:21 - Dados recebidos: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 02:44:21 - Login bem-sucedido para: infovisa.gurupi@govnex.site

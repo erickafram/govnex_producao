@@ -1,6 +1,6 @@
 <?php
 // Carregar variáveis de ambiente
-require_once __DIR__ . '/api/config.php';
+require_once __DIR__ . '/db_config.php'';
 
 // Obter a porta da API do arquivo .env ou usar 8000 como padrão
 $port = getenv('API_PORT') ?: 8000;

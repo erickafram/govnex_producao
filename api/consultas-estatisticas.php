@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php'; // Adicionado: incluir config.php para funções auxiliares
 require_once __DIR__ . '/controllers/ConsultaController.php';
 
 // Configurações de CORS para permitir acesso da aplicação React

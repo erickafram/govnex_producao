@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php'; // Adicionado: incluir config.php para funções auxiliares
 require_once __DIR__ . '/../models/Consulta.php';
 require_once __DIR__ . '/../models/User.php';
 
@@ -15,45 +16,66 @@ class ConsultaController
 
     /**
      * Obter consultas disponíveis e histórico para um usuário
+     * 
+     * @param int $userId ID do usuário
+     * @return array Resposta com status e número de consultas
      */
-    public function getConsultasDisponiveis()
+    public function getConsultasDisponiveis($userId)
     {
-        // Obter ID do usuário da query string
-        $userId = isset($_GET['userId']) ? intval($_GET['userId']) : 0;
-
+        // Converter para inteiro para garantir que é um número
+        $userId = intval($userId);
+        error_log("ConsultaController.getConsultasDisponiveis: Iniciando para usuário ID $userId");
+        
         if ($userId <= 0) {
+            error_log("ConsultaController.getConsultasDisponiveis: ID de usuário inválido");
             jsonResponse(['error' => 'ID de usuário inválido'], 400);
+            return;
         }
 
         try {
             // Obter usuário
             $user = $this->userModel->getById($userId);
-
+            error_log("ConsultaController.getConsultasDisponiveis: Dados do usuário: " . ($user ? json_encode($user) : "não encontrado"));
+            
             if (!$user) {
+                error_log("ConsultaController.getConsultasDisponiveis: Usuário não encontrado");
                 jsonResponse(['error' => 'Usuário não encontrado'], 404);
+                return;
             }
 
+            // Verificar se o usuário tem crédito
+            $credito = isset($user['balance']) ? floatval($user['balance']) : 0;
+            error_log("ConsultaController.getConsultasDisponiveis: Crédito do usuário: $credito");
+            
             // Calcular número de consultas disponíveis (cada consulta custa 0.12)
-            $credito = floatval($user['balance']);
             $consultasDisponiveis = floor($credito / 0.12);
-
-            // Obter histórico de consultas
+            error_log("ConsultaController.getConsultasDisponiveis: Consultas disponíveis calculadas: $consultasDisponiveis");
+            
+            // Verificar se o domínio está presente
             $dominio = $user['domain'] ?? null;
+            error_log("ConsultaController.getConsultasDisponiveis: Domínio do usuário: " . ($dominio ?: "não definido"));
+            
+            // Obter histórico de consultas
             $historicoConsultas = [];
 
             if ($dominio) {
                 $historicoConsultas = $this->consultaModel->getByDominio($dominio, 10);
+                error_log("ConsultaController.getConsultasDisponiveis: Histórico de consultas: " . json_encode($historicoConsultas));
             }
 
-            jsonResponse([
+            // Retornar resposta
+            $response = [
                 'success' => true,
                 'credito' => $credito,
                 'consultasDisponiveis' => $consultasDisponiveis,
                 'historicoConsultas' => $historicoConsultas
-            ]);
+            ];
+            
+            error_log("ConsultaController.getConsultasDisponiveis: Resposta: " . json_encode($response));
+            jsonResponse($response);
         } catch (Exception $e) {
             error_log("Erro ao obter consultas: " . $e->getMessage());
-            jsonResponse(['error' => 'Erro ao processar a solicitação'], 500);
+            jsonResponse(['error' => 'Erro ao processar a solicitação: ' . $e->getMessage()], 500);
         }
     }
 

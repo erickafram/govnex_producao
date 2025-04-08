@@ -3,3 +3,5 @@
 2025-04-07 23:29:13 - Consultas encontradas: 1239
 2025-04-07 23:39:35 - Solicitação de estatísticas para domínio: infovisa.gurupi.to.gov.br
 2025-04-07 23:39:35 - Consultas encontradas: 1239
+2025-04-08 01:22:13 - Solicitação de estatísticas para domínio: infovisa.gurupi.to.gov.br
+2025-04-08 01:22:13 - Consultas encontradas: 1239

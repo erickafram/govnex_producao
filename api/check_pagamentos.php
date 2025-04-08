@@ -1,7 +1,7 @@
 <?php
 // Script para verificar o estado atual da tabela pagamentos
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php'''';
 
 try {
     $db = getDbConnection();

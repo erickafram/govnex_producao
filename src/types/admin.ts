@@ -2,11 +2,14 @@
 
 export interface AdminStats {
   totalUsers: number;
+  totalUsersWithDomain?: number;
   totalBalance: number;
   totalPayments: number;
   totalPaymentsValue: number;
+  totalPaymentsCount?: number;
   totalConsultas: number;
   totalConsultasValue: number;
+  totalConsultasCount?: number;
 }
 
 export interface RecentUser {
