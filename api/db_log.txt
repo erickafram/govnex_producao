@@ -629,3 +629,33 @@ dos configurada
 2025-04-08 16:47:46 - Server Name: localhost
 2025-04-08 16:47:46 - Conexão com o banco de dados configurada
 2025-04-08 16:47:46 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:18 - Tentando conectar ao banco de dados
+2025-04-08 17:10:18 - Ambiente: Desenvolvimento
+ de dados
+2025-04-08 17:10:18 - Ambiente: Desenvolvimento
+2025-04-08 17:10:18 - Tentando conectar ao banco de dados
+2025-04-08 17:10:18 - Server Name: localhost
+2025-04-08 17:10:18 - Tentando conectar ao banco de dados
+2025-04-08 17:10:18 - Ambiente: Desenvolvimento
+2025-04-08 17:10:18 - Ambiente: Desenvolvimento
+2025-04-08 17:10:18 - Server Name: localhost
+ dados configurada
+2025-04-08 17:10:18 - Server Name: localhost
+2025-04-08 17:10:18 - Conexão com o banco de dados configurada
+2025-04-08 17:10:18 - Conexão com o banco de dados configurada
+2025-04-08 17:10:18 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:18 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:18 - Server Name: localhost
+2025-04-08 17:10:18 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:18 - Conexão com o banco de dados configurada
+2025-04-08 17:10:18 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:18 - Tentando conectar ao banco de dados
+2025-04-08 17:10:18 - Ambiente: Desenvolvimento
+2025-04-08 17:10:18 - Server Name: localhost
+2025-04-08 17:10:18 - Conexão com o banco de dados configurada
+2025-04-08 17:10:18 - Conexão com o banco de dados estabelecida com sucesso
+2025-04-08 17:10:21 - Tentando conectar ao banco de dados
+2025-04-08 17:10:21 - Ambiente: Desenvolvimento
+2025-04-08 17:10:21 - Server Name: localhost
+2025-04-08 17:10:21 - Conexão com o banco de dados configurada
+2025-04-08 17:10:21 - Conexão com o banco de dados estabelecida com sucesso
