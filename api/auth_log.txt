@@ -303,3 +303,32 @@ Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Nenhum token recebido em update_user.php, usando modo de desenvolvimento

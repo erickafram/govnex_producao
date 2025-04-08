@@ -1,0 +1,4 @@
+2025-04-08 16:46:58 - Request received: GET
+2025-04-08 16:46:58 - Database connection successful
+2025-04-08 16:46:58 - Processing GET request to list tokens
+2025-04-08 16:46:58 - Retrieved 2 tokens

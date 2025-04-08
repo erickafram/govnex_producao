@@ -22,12 +22,9 @@ interface AuthContextType {
   updateUser: (updatedUser: User) => void;
 }
 
-// API URL - Using empty base URL for proxy
-const API_URL = "";
-
 // API functions
 const apiLogin = async (email: string, password: string): Promise<User> => {
-  const response = await fetch(`${API_URL}/api/direct-login.php`, {
+  const response = await fetch(getApiUrl('direct-login.php'), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -45,7 +42,7 @@ const apiLogin = async (email: string, password: string): Promise<User> => {
 };
 
 const apiRegister = async (userData: RegisterData): Promise<User> => {
-  const response = await fetch(`${API_URL}/api/register.php`, {
+  const response = await fetch(getApiUrl('register.php'), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

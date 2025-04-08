@@ -1,108 +1,104 @@
 <?php
-require_once 'cors.php';
-require_once __DIR__ . '/db_config.php'; // Corrigido: removido as aspas extras
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Ensure all errors are caught and returned as JSON, not as HTML
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
+// First load CORS and other requirements with absolute paths
+require_once __DIR__ . '/cors.php';
+require_once __DIR__ . '/db_config.php';
 
-// Adicionar cabeçalhos CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+// Set JSON content type early
 header("Content-Type: application/json");
 
-// Responder imediatamente às solicitações OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
+// Function to send JSON response
+function sendJsonResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    echo json_encode($data);
     exit;
 }
 
-// Log para depuração
+// Log for debugging
 $logFile = __DIR__ . '/login_log.txt';
-file_put_contents($logFile, date('Y-m-d H:i:s') . " - Requisição de login recebida\n", FILE_APPEND);
-
-// Verificar método
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Método não permitido']);
-    exit;
-}
-
-// Obter dados da requisição
-$data = json_decode(file_get_contents('php://input'), true);
-file_put_contents($logFile, date('Y-m-d H:i:s') . " - Dados recebidos: " . json_encode($data) . "\n", FILE_APPEND);
-
-// Validar dados
-if (empty($data['email']) || empty($data['password'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Email e senha são obrigatórios']);
-    exit;
-}
-
-// Obter conexão com o banco de dados
-$conn = getDbConnection();
-
-// Verificar se a conexão foi estabelecida
-if (!$conn) {
-    // Log do erro
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Erro: Falha na conexão com o banco de dados\n", FILE_APPEND);
-    
-    // Responder com erro
-    http_response_code(500);
-    echo json_encode(['error' => 'Erro interno do servidor']);
-    exit;
-}
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - Login request received\n", FILE_APPEND);
 
 try {
-    // Buscar usuário pelo email
+    // Add CORS headers
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+    // Handle OPTIONS request
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        sendJsonResponse(['status' => 'success'], 200);
+    }
+
+    // Check request method
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        sendJsonResponse(['error' => 'Method not allowed'], 405);
+    }
+
+    // Get request data
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    
+    // Log received data
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Data received: " . json_encode($data) . "\n", FILE_APPEND);
+
+    // Validate data
+    if (!is_array($data) || empty($data['email']) || empty($data['password'])) {
+        sendJsonResponse(['error' => 'Email and password are required'], 400);
+    }
+
+    // Get database connection
+    $conn = getDbConnection();
+    if (!$conn) {
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Error: Database connection failed\n", FILE_APPEND);
+        sendJsonResponse(['error' => 'Internal server error - DB connection failed'], 500);
+    }
+
+    // Find user by email
     $stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = :email");
     $stmt->bindParam(':email', $data['email']);
     $stmt->execute();
     
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Verificar se o usuário existe
+    // Check if user exists
     if (!$user) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Credenciais inválidas']);
-        exit;
+        sendJsonResponse(['error' => 'Invalid credentials'], 401);
     }
     
-    // Verificar senha
+    // Verify password
     if (!password_verify($data['password'], $user['senha'])) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Credenciais inválidas']);
-        exit;
+        sendJsonResponse(['error' => 'Invalid credentials'], 401);
     }
     
-    // Gerar token JWT (simplificado)
+    // Generate token
     $token = bin2hex(random_bytes(32));
     
-    // Não atualizamos o token no banco pois a tabela não tem essa coluna
-    // Apenas mantemos o token na resposta para o frontend
-    
-    // Remover senha do resultado
+    // Remove password from result
     unset($user['senha']);
     
-    // Adicionar propriedade isAdmin
+    // Add isAdmin property
     $user['isAdmin'] = ($user['nivel_acesso'] === 'administrador');
     
-    // Responder com sucesso
-    echo json_encode([
+    // Log successful login
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Login successful for: " . $data['email'] . "\n", FILE_APPEND);
+    
+    // Send success response
+    sendJsonResponse([
         'success' => true,
-        'message' => 'Login realizado com sucesso',
+        'message' => 'Login successful',
         'user' => $user,
         'token' => $token
-    ]);
-    
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Login bem-sucedido para: " . $data['email'] . "\n", FILE_APPEND);
+    ], 200);
     
 } catch (PDOException $e) {
-    // Log do erro
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Erro: " . $e->getMessage() . "\n", FILE_APPEND);
-    
-    // Responder com erro
-    http_response_code(500);
-    echo json_encode(['error' => 'Erro interno do servidor']);
+    // Log database error
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - Database error: " . $e->getMessage() . "\n", FILE_APPEND);
+    sendJsonResponse(['error' => 'Database error: ' . $e->getMessage()], 500);
+} catch (Exception $e) {
+    // Log general error
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - General error: " . $e->getMessage() . "\n", FILE_APPEND);
+    sendJsonResponse(['error' => 'Server error: ' . $e->getMessage()], 500);
 }

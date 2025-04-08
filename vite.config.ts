@@ -17,10 +17,10 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API requests to the PHP server
         '/api': {
-          target: 'http://localhost/react/govnex/pix-credit-nexus/api', // Caminho correto para o servidor Apache/PHP
+          target: 'http://localhost:80', // Usando a porta padrão do Apache
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, ''), // Remove o prefixo /api
+          rewrite: (path) => path.replace(/^\/api/, '/react/govnex/govnex/api'), // Ajustando o caminho para o seu projeto
           configure: (proxy, _options) => {
             proxy.on('error', (err, _req, _res) => {
               console.log('proxy error', err);
@@ -35,10 +35,10 @@ export default defineConfig(({ mode }) => {
         },
         // Proxy para a pasta temp (QR codes)
         '/temp': {
-          target: 'http://localhost/react/govnex/pix-credit-nexus/temp',
+          target: 'http://localhost:80',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/temp/, '')
+          rewrite: (path) => path.replace(/^\/temp/, '/react/govnex/govnex/temp')
         }
       }
     },
