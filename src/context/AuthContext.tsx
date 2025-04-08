@@ -231,9 +231,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUser = (updatedUser: User) => {
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+  // Garantir que o balance seja um número
+  const processedUser = {
+    ...updatedUser,
+    balance: typeof updatedUser.balance === 'string' ? parseFloat(updatedUser.balance) : updatedUser.balance
   };
+  
+  setUser(processedUser);
+  localStorage.setItem("user", JSON.stringify(processedUser));
+};
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateUser }}>

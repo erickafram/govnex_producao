@@ -1,53 +1,71 @@
 <?php
-// Incluir configurações e funções auxiliares
-require_once __DIR__ . '/config.php';
-
-// Configurar CORS
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=UTF-8");
 
-// Responder imediatamente a requisições OPTIONS (preflight)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
+require_once __DIR__ . '/config/database.php';
+
+// Create logs directory if it doesn't exist
+if (!is_dir(__DIR__ . '/logs')) {
+    mkdir(__DIR__ . '/logs', 0777, true);
 }
 
-// Logging para debug
-error_log("consultas.php: Método: " . $_SERVER['REQUEST_METHOD']);
-error_log("consultas.php: Query params: " . json_encode($_GET));
-error_log("consultas.php: Headers: " . json_encode(getallheaders()));
+// Log file for debugging
+$logFile = __DIR__ . '/logs/consultas_log.txt';
 
-// Incluir controller
-require_once __DIR__ . '/controllers/ConsultaController.php';
+function logMessage($message) {
+    global $logFile;
+    $timestamp = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
+}
 
-// Verificar método da requisição
-$controller = new ConsultaController();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Verificar se é uma solicitação para obter consultas disponíveis
-    if (isset($_GET['userId'])) {
-        error_log("consultas.php: Processando solicitação para obter consultas disponíveis");
-        $controller->getConsultasDisponiveis($_GET['userId']);
-    } else {
-        error_log("consultas.php: Parâmetro userId não fornecido");
-        jsonResponse(['error' => 'Parâmetro userId é obrigatório'], 400);
+try {
+    // Get query parameters
+    $userId = $_GET['userId'] ?? null;
+    $dominio = $_GET['dominio'] ?? null;
+
+    if (!$userId) {
+        throw new Exception('UserId is required');
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Obter dados do corpo da requisição
-    $data = getRequestData();
-    error_log("consultas.php: Dados POST: " . json_encode($data));
+
+    // Get database connection
+    $database = new Database();
+    $conn = $database->getConnection();
+
+    // Get user data
+    $stmt = $conn->prepare("
+        SELECT credito, nivel_acesso 
+        FROM usuarios 
+        WHERE id = :userId
+    ");
     
-    // Verificar se é uma solicitação para registrar consulta
-    if (isset($data['cnpj']) && isset($data['userId'])) {
-        error_log("consultas.php: Processando solicitação para registrar consulta");
-        $controller->registrarConsulta($data);
-    } else {
-        error_log("consultas.php: Parâmetros obrigatórios não fornecidos");
-        jsonResponse(['error' => 'Parâmetros obrigatórios não fornecidos'], 400);
+    $stmt->bindParam(':userId', $userId);
+    $stmt->execute();
+    
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$userData) {
+        throw new Exception('User not found');
     }
-} else {
-    error_log("consultas.php: Método não suportado: " . $_SERVER['REQUEST_METHOD']);
-    jsonResponse(['error' => 'Método não suportado'], 405);
+
+    // Return response
+    echo json_encode([
+        'success' => true,
+        'consultasDisponiveis' => 100, // Você pode ajustar este valor conforme necessário
+        'credito' => $userData['credito']
+    ]);
+
+} catch (Exception $e) {
+    logMessage("Error: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }

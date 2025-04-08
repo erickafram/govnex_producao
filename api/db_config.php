@@ -8,8 +8,8 @@ if (!function_exists('getDbConfig')) {
         return [
             'host' => 'localhost',
             'dbname' => 'govnex',
-            'username' => 'root',
-            'password' => ''
+            'username' => 'govnex',
+            'password' => '@@2025@@Ekb'
         ];
     }
 }

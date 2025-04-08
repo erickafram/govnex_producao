@@ -5,62 +5,77 @@ class Database {
     private $username;
     private $password;
     private $conn;
+    private $port;
 
     public function __construct() {
-        // Detectar ambiente
-        $serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
-        $isProduction = ($serverName === '161.35.60.249' || $serverName === 'govnex.site' || strpos($serverName, '.govnex.site') !== false);
-        
-        // Log para depuração
-        $logFile = __DIR__ . '/../db_log.txt';
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Tentando conectar ao banco de dados\n", FILE_APPEND);
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Ambiente: " . ($isProduction ? "Produção" : "Desenvolvimento") . "\n", FILE_APPEND);
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Server Name: " . $serverName . "\n", FILE_APPEND);
-        
-        // Configurar conexão com base no ambiente
-        if ($isProduction) {
-            // Configurações de produção
-            $this->host = "localhost"; // Normalmente continua sendo localhost em produção
-            $this->db_name = "govnex";
-            $this->username = "govnex"; // Usuário de produção
-            $this->password = "@@2025@@Ekb"; // Senha de produção
-        } else {
-            // Configurações de desenvolvimento
-            $this->host = "localhost";
-            $this->db_name = "govnex";
-            $this->username = "root";
-            $this->password = "";
+        // Criar diretório de logs se não existir
+        $logDir = __DIR__ . '/../logs';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
         }
+
+        // Configurações fixas para produção
+        $this->host = '127.0.0.1'; // Use IP em vez de 'localhost'
+        $this->db_name = 'govnex';
+        $this->username = 'govnex';
+        $this->password = '@@2025@@Ekb';
+        $this->port = 3306;
+
+        // Log das configurações
+        $this->logDebugInfo();
+    }
+
+    private function logDebugInfo() {
+        $logFile = __DIR__ . '/../logs/db_log.txt';
         
-        // Log para depuração
-        $logFile = __DIR__ . '/../db_log.txt';
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Conexão com o banco de dados configurada\n", FILE_APPEND);
+        // Informações para debug
+        $debugInfo = [
+            date('Y-m-d H:i:s') . " - Iniciando conexão com o banco de dados",
+            "Host: " . $this->host,
+            "Database: " . $this->db_name,
+            "Username: " . $this->username,
+            "Port: " . $this->port,
+            "PHP Version: " . PHP_VERSION,
+            "Server Software: " . ($_SERVER['SERVER_SOFTWARE'] ?? 'undefined'),
+            "Server Name: " . ($_SERVER['SERVER_NAME'] ?? 'undefined'),
+            "Remote Addr: " . ($_SERVER['REMOTE_ADDR'] ?? 'undefined')
+        ];
+        
+        file_put_contents($logFile, implode("\n", $debugInfo) . "\n\n", FILE_APPEND);
     }
 
     public function getConnection() {
-        $this->conn = null;
-
         try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name,
-                $this->username,
-                $this->password
-            );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->exec("set names utf8");
+            // Construir DSN
+            $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->db_name};charset=utf8mb4";
             
-            // Log para depuração
-            $logFile = __DIR__ . '/../db_log.txt';
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Conexão com o banco de dados estabelecida com sucesso\n", FILE_APPEND);
-        } catch(PDOException $exception) {
-            // Log do erro
-            $logFile = __DIR__ . '/../db_log.txt';
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " - Erro de conexão: " . $exception->getMessage() . "\n", FILE_APPEND);
+            // Opções do PDO
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+            ];
             
-            // Em vez de imprimir o erro, lançamos uma exceção para ser tratada pelo código que chamou este método
-            throw new PDOException("Erro de conexão com o banco de dados: " . $exception->getMessage());
+            // Tentar conexão
+            $this->conn = new PDO($dsn, $this->username, $this->password, $options);
+            
+            // Log de sucesso
+            $this->logMessage("Conexão estabelecida com sucesso");
+            
+            return $this->conn;
+        } catch(PDOException $e) {
+            // Log do erro completo
+            $this->logMessage("Erro de conexão: " . $e->getMessage());
+            
+            // Em produção, retornar mensagem genérica
+            throw new PDOException("Falha na conexão com o banco de dados");
         }
+    }
 
-        return $this->conn;
+    private function logMessage($message) {
+        $logFile = __DIR__ . '/../logs/db_log.txt';
+        $timestamp = date('Y-m-d H:i:s');
+        file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
     }
 }

@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { API_URL } from "@/config";
+import { API_URL, getApiUrl } from "@/config";  // Adicionado getApiUrl aqui
 
 // Mock data for the chart
 const chartData = [
@@ -45,7 +45,8 @@ const Dashboard = () => {
         console.log("Dashboard: Domínio do usuário:", user.domain);
 
         // Adicionar o domínio do usuário como parâmetro adicional
-        const apiUrl = `/api/consultas.php?userId=${user.id}&dominio=${user.domain || ''}`;
+        // No Dashboard.tsx, atualizar a linha que constrói a URL:
+        const apiUrl = getApiUrl(`consultas.php?userId=${user.id}&dominio=${user.domain || ''}`);
         console.log(`Dashboard: Buscando dados em ${apiUrl}`);
         
         // Adicionar cabeçalhos de autenticação
@@ -87,13 +88,16 @@ const Dashboard = () => {
           setConsultasDisponiveis(data.consultasDisponiveis);
 
           // Atualizar o saldo do usuário no context com o valor atual do backend
-          if (data.credito !== undefined && user) {
-            console.log("Dashboard: Atualizando saldo do usuário:", data.credito);
-            // Atualiza no localStorage para persistir a mudança
-            const updatedUser = { ...user, balance: data.credito };
-            // Usa a função updateUser do contexto
-            updateUser(updatedUser);
-          }
+          // No Dashboard.tsx, atualizar a linha onde atualizamos o usuário
+if (data.credito !== undefined && user) {
+  console.log("Dashboard: Atualizando saldo do usuário:", data.credito);
+  // Converter o crédito para número
+  const creditoNumerico = parseFloat(data.credito);
+  // Atualiza no localStorage para persistir a mudança
+  const updatedUser = { ...user, balance: creditoNumerico };
+  // Usa a função updateUser do contexto
+  updateUser(updatedUser);
+}
         } else {
           console.error("Dashboard: Resposta sem sucesso:", data);
           // Se a API retornou uma resposta sem sucesso, usar valores padrão
@@ -104,11 +108,12 @@ const Dashboard = () => {
         try {
           const token = localStorage.getItem('token') || 'dev_token_user_1';
           console.log("Dashboard: Buscando transações em /api/mock_transactions.php?limit=5");
-          const transactionsResponse = await fetch(`/api/mock_transactions.php?limit=5`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+          // Atualizar a chamada da API de transações
+const transactionsResponse = await fetch(getApiUrl('mock_transactions.php?limit=5'), {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
 
           if (transactionsResponse.ok) {
             const transactionData = await transactionsResponse.json();

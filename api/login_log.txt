@@ -160,3 +160,21 @@
 2025-04-08 17:10:18 - Login request received
 2025-04-08 17:10:18 - Data received: {"email":"erickafram08@gmail.com","password":"123456"}
 2025-04-08 17:10:18 - Login successful for: erickafram08@gmail.com
+2025-04-08 19:53:22 - Login request received
+2025-04-08 19:53:22 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 19:53:22 - Error: Database connection failed
+2025-04-08 19:53:57 - Login request received
+2025-04-08 19:53:57 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 19:53:57 - Error: Database connection failed
+2025-04-08 19:54:54 - Login request received
+2025-04-08 19:54:54 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 19:54:54 - Error: Database connection failed
+2025-04-08 19:57:55 - Login request received
+2025-04-08 19:57:55 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 19:57:55 - Error: Database connection failed
+2025-04-08 20:05:32 - Login request received
+2025-04-08 20:05:32 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 20:05:32 - Error: Database connection failed
+2025-04-08 20:17:46 - Login request received
+2025-04-08 20:17:46 - Data received: {"email":"infovisa.gurupi@govnex.site","password":"123456"}
+2025-04-08 20:17:46 - Error: Database connection failed

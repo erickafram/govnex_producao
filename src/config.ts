@@ -25,14 +25,14 @@ const getApiBaseUrl = () => {
                        window.location.hostname.endsWith('.govnex.site');
   
   if (isProduction) {
-    // Em produção, precisamos usar a URL completa para a API
+    // Em produção, usar a porta 8000
     console.log('Ambiente de produção detectado, usando URL de produção');
-    return 'http://161.35.60.249/react/govnex/pix-credit-nexus/api';
+    return 'http://161.35.60.249:8000';
   }
   
   // Em desenvolvimento, usar o proxy configurado no Vite
   console.log('Ambiente de desenvolvimento detectado, usando proxy');
-  return '/api';
+  return 'http://localhost:8000';
 };
 
 // URL base da API
@@ -43,18 +43,8 @@ console.log('API_URL configurada:', API_URL);
 export const getApiUrl = (endpoint: string) => {
   const baseUrl = API_URL;
   
-  // Se a baseUrl já inclui o caminho completo da API
-  if (baseUrl.includes('/api')) {
-    // Se o endpoint já começa com /, remover para evitar barras duplas
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
-    return `${baseUrl}/${cleanEndpoint}`;
-  }
+  // Se o endpoint já começar com /, remover para evitar barras duplas
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
   
-  // Se o endpoint já começar com /api, não adicionar novamente
-  if (endpoint.startsWith('/api/')) {
-    return `${baseUrl}${endpoint}`;
-  }
-  
-  // Caso contrário, adicionar o prefixo /api/
-  return `${baseUrl}/api/${endpoint}`;
+  return `${baseUrl}/${cleanEndpoint}`;
 };
