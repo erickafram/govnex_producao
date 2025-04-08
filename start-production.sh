@@ -1,69 +1,54 @@
 #!/bin/bash
-# Script para iniciar o ambiente de produção com suporte a CORS
+# Script para iniciar o ambiente de produção
 
 # Diretório do projeto
-PROJECT_DIR="/var/www/html/pix-credit-nexus"
+PROJECT_DIR="/var/www/html/react/govnex/pix-credit-nexus"
 cd $PROJECT_DIR
 
 # Parar serviços existentes
 echo "Parando serviços existentes..."
-pkill -f "php -S"
-pm2 stop all 2>/dev/null
+pkill -f "php -S" || true
+pm2 stop all 2>/dev/null || true
 
 # Limpar logs antigos
 echo "Limpando logs antigos..."
-rm -f $PROJECT_DIR/api/cors_log.txt
+rm -f $PROJECT_DIR/api/logs/*.log
 rm -f $PROJECT_DIR/frontend.log
 
-# Iniciar o servidor PHP com suporte a CORS
-echo "Iniciando servidor PHP com suporte a CORS na porta 8000..."
-php $PROJECT_DIR/api/cors-server.php > $PROJECT_DIR/php_server.log 2>&1 &
-BACKEND_PID=$!
-
-# Aguardar o servidor PHP iniciar
-echo "Aguardando o servidor PHP iniciar..."
-sleep 2
-
-# Verificar se o servidor PHP está rodando
-if ps -p $BACKEND_PID > /dev/null; then
-    echo "Servidor PHP iniciado com sucesso (PID: $BACKEND_PID)"
+# Verificar se o Apache está rodando
+echo "Verificando se o Apache está rodando..."
+if systemctl is-active --quiet apache2; then
+    echo "Apache está rodando"
 else
-    echo "ERRO: Falha ao iniciar o servidor PHP"
-    exit 1
+    echo "Iniciando Apache..."
+    systemctl start apache2
 fi
 
-# Iniciar o frontend
-echo "Iniciando frontend na porta 8082..."
+# Construir a aplicação para produção
+echo "Construindo aplicação para produção..."
 cd $PROJECT_DIR
-npm run dev > $PROJECT_DIR/frontend.log 2>&1 &
-FRONTEND_PID=$!
+NODE_ENV=production npm run build
 
-# Aguardar o frontend iniciar
-echo "Aguardando o frontend iniciar..."
-sleep 5
-
-# Verificar se o frontend está rodando
-if ps -p $FRONTEND_PID > /dev/null; then
-    echo "Frontend iniciado com sucesso (PID: $FRONTEND_PID)"
-else
-    echo "ERRO: Falha ao iniciar o frontend"
-    exit 1
-fi
+# Iniciar o frontend com o servidor de produção
+echo "Iniciando servidor de produção na porta 8081..."
+cd $PROJECT_DIR
+pm2 delete pix-credit-nexus-frontend 2>/dev/null || true
+pm2 serve dist 8081 --name pix-credit-nexus-frontend --spa
 
 echo ""
 echo "=== AMBIENTE DE PRODUÇÃO INICIADO ==="
-echo "API: http://161.35.60.249:8000"
+echo "API: http://161.35.60.249/react/govnex/pix-credit-nexus/api"
 echo "Frontend: http://161.35.60.249:8081"
+echo "Frontend (domínio): http://govnex.site:8081"
 echo ""
-echo "Logs:"
-echo "- API: $PROJECT_DIR/php_server.log"
-echo "- Frontend: $PROJECT_DIR/frontend.log"
-echo "- CORS: $PROJECT_DIR/api/cors_log.txt"
+echo "Para acessar a aplicação, abra um dos seguintes URLs:"
+echo "- http://161.35.60.249:8081"
+echo "- http://govnex.site:8081"
 echo ""
 echo "Para parar os serviços, execute:"
-echo "pkill -f 'php -S'; pkill -f 'node'"
+echo "pm2 stop pix-credit-nexus-frontend"
+echo ""
+echo "Para ver os logs do frontend:"
+echo "pm2 logs pix-credit-nexus-frontend"
 echo ""
 echo "Pressione Ctrl+C para sair deste script (os serviços continuarão rodando)"
-
-# Manter o script rodando
-tail -f $PROJECT_DIR/php_server.log $PROJECT_DIR/frontend.log $PROJECT_DIR/api/cors_log.txt
