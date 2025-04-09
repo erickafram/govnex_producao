@@ -16,7 +16,7 @@ const UserProfile = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   // Estados para os formulários
   const [profileData, setProfileData] = useState({
     name: "",
@@ -25,16 +25,16 @@ const UserProfile = () => {
     phone: "",
     domain: ""
   });
-  
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  
+
   // Inicializar dados do perfil quando o usuário estiver disponível
   useEffect(() => {
     if (user) {
@@ -50,21 +50,30 @@ const UserProfile = () => {
       navigate("/login");
     }
   }, [user, navigate]);
-  
+
   // Atualizar dados do perfil
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
-    
+
     setIsLoading(true);
-    
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Token não encontrado");
       }
-      
+
+      console.log("Enviando dados para atualização:", {
+        userId: user.id,
+        name: profileData.name,
+        email: profileData.email,
+        document: profileData.document,
+        phone: profileData.phone,
+        domain: profileData.domain
+      });
+
       const response = await fetch(getApiUrl('update_profile.php'), {
         method: "POST",
         headers: {
@@ -80,40 +89,62 @@ const UserProfile = () => {
           domain: profileData.domain
         })
       });
-      
-      const data = await response.json();
-      
+
+      const responseText = await response.text();
+      console.log("Resposta bruta da API:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Erro ao processar resposta JSON:", parseError);
+        throw new Error(`Erro ao processar resposta do servidor: ${responseText.substring(0, 100)}...`);
+      }
+
       if (!response.ok) {
         throw new Error(data.error || "Erro ao atualizar perfil");
       }
-      
+
       // Atualizar o contexto do usuário com os novos dados
       if (data.user) {
         updateUser(data.user);
       }
-      
+
       toast({
         title: "Perfil atualizado",
         description: "Seus dados foram atualizados com sucesso",
       });
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
+
+      // Melhorar a mensagem de erro para o usuário
+      let errorMessage = "Não foi possível atualizar o perfil";
+      if (error instanceof Error) {
+        // Mostrar a mensagem de erro completa
+        errorMessage = error.message;
+
+        // Se a mensagem contiver "SQLSTATE", extrair apenas a parte relevante para o usuário
+        if (errorMessage.includes("SQLSTATE")) {
+          errorMessage = "Erro no banco de dados. Por favor, verifique seus dados e tente novamente mais tarde.";
+        }
+      }
+
       toast({
         title: "Erro",
-        description: error instanceof Error ? error.message : "Não foi possível atualizar o perfil",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   // Atualizar senha
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
-    
+
     // Validar senhas
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
@@ -123,7 +154,7 @@ const UserProfile = () => {
       });
       return;
     }
-    
+
     if (passwordData.newPassword.length < 6) {
       toast({
         title: "Erro",
@@ -132,15 +163,15 @@ const UserProfile = () => {
       });
       return;
     }
-    
+
     setIsUpdatingPassword(true);
-    
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Token não encontrado");
       }
-      
+
       const response = await fetch(getApiUrl('update_password.php'), {
         method: "POST",
         headers: {
@@ -153,20 +184,20 @@ const UserProfile = () => {
           newPassword: passwordData.newPassword
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || "Erro ao atualizar senha");
       }
-      
+
       // Limpar formulário de senha
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
       });
-      
+
       toast({
         title: "Senha atualizada",
         description: "Sua senha foi atualizada com sucesso",
@@ -182,11 +213,11 @@ const UserProfile = () => {
       setIsUpdatingPassword(false);
     }
   };
-  
+
   if (!user) {
     return null;
   }
-  
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -196,7 +227,7 @@ const UserProfile = () => {
             Gerencie suas informações pessoais e senha
           </p>
         </div>
-        
+
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList>
             <TabsTrigger value="profile" className="flex items-center gap-2">
@@ -208,7 +239,7 @@ const UserProfile = () => {
               Segurança
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="profile" className="space-y-4">
             <Card>
               <CardHeader>
@@ -229,7 +260,7 @@ const UserProfile = () => {
                         required
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="email">E-mail</Label>
                       <Input
@@ -240,7 +271,7 @@ const UserProfile = () => {
                         required
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="document">CPF/CNPJ</Label>
                       <Input
@@ -250,7 +281,7 @@ const UserProfile = () => {
                         required
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone</Label>
                       <Input
@@ -259,7 +290,7 @@ const UserProfile = () => {
                         onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                       />
                     </div>
-                    
+
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="domain">Domínio (opcional)</Label>
                       <Input
@@ -276,7 +307,7 @@ const UserProfile = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end">
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
@@ -296,7 +327,7 @@ const UserProfile = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="security" className="space-y-4">
             <Card>
               <CardHeader>
@@ -318,9 +349,9 @@ const UserProfile = () => {
                         required
                       />
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">Nova Senha</Label>
                       <Input
@@ -334,7 +365,7 @@ const UserProfile = () => {
                         A senha deve ter pelo menos 6 caracteres
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
                       <Input
@@ -346,7 +377,7 @@ const UserProfile = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end">
                     <Button type="submit" disabled={isUpdatingPassword}>
                       {isUpdatingPassword ? (

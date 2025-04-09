@@ -7,9 +7,9 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => {
   // Carregar variáveis de ambiente com base no modo (development, production)
   const env = loadEnv(mode, process.cwd(), '');
-  
+
   console.log(`Modo: ${mode}, Variáveis de ambiente carregadas:`, env);
-  
+
   return {
     server: {
       host: "::",
@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:80', // Usando a porta padrão do Apache
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '/react/govnex/govnex/api'), // Ajustando o caminho para o seu projeto
+          rewrite: (path) => path.replace(/^\/api/, '/react/govnex_producao/api'), // Corrigido o caminho para apontar para a pasta correta
           configure: (proxy, _options) => {
             proxy.on('error', (err, _req, _res) => {
               console.log('proxy error', err);
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:80',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/temp/, '/react/govnex/govnex/temp')
+          rewrite: (path) => path.replace(/^\/temp/, '/react/govnex_producao/temp')
         }
       }
     },

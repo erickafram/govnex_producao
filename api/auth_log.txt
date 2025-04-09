@@ -342,3 +342,16 @@ Token recebido em update_profile.php: 6407db607879736e6314ca28eea8ffbf197f4e966f
 Token recebido em update_profile.php: 1ff50836d6bf947419d2ca0ddf6cc02971730cfc54573174fbf096238a84b469
 Token recebido em update_profile.php: 14bddcf1faf6fa9328305c672b520e85f905871b37bbe334d63df028939197d7
 Token recebido em update_profile.php: 14bddcf1faf6fa9328305c672b520e85f905871b37bbe334d63df028939197d7
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Nenhum token recebido em update_user.php, usando modo de desenvolvimento
+Nenhum token recebido em update_user.php, usando modo de desenvolvimento
+Nenhum token recebido, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
+Nenhum token recebido em admin_users.php, usando modo de desenvolvimento

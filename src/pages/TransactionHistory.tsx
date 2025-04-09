@@ -23,7 +23,7 @@ const TransactionHistory: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -77,11 +77,15 @@ const TransactionHistory: React.FC = () => {
         try {
             // Usar o token do localStorage ou o token de desenvolvimento
             const token = localStorage.getItem('token') || 'dev_token_user_1';
-            
+
             console.log("Buscando transações com token:", token);
 
+            // URL completa para debug - usando o novo endpoint com CORS
+            const apiUrl = `/api/payments_cors.php?page=${page}&limit=${pageSize}`;
+            console.log("URL da API:", apiUrl);
+
             // Usar o caminho relativo para o proxy configurado no vite.config.ts
-            const response = await fetch(`/api/payments.php?page=${page}&limit=${pageSize}`, {
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,16 +95,26 @@ const TransactionHistory: React.FC = () => {
             });
 
             console.log("Status da resposta:", response.status);
-            
+            console.log("Headers:", [...response.headers.entries()]);
+
+            // Obter o texto da resposta primeiro para verificar o conteúdo
+            const responseText = await response.text();
+            console.log("Resposta bruta:", responseText);
+
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Erro na resposta:", errorData);
-                throw new Error(errorData.error || "Falha ao carregar transações");
+                throw new Error(`HTTP error! status: ${response.status}, Resposta: ${responseText}`);
             }
 
-            const data = await response.json();
-            console.log("Dados recebidos:", data);
-            
+            // Tentar converter o texto para JSON
+            let data;
+            try {
+                data = JSON.parse(responseText);
+                console.log("Dados JSON parseados:", data);
+            } catch (error) {
+                console.error("Erro ao fazer parse do JSON:", error);
+                throw new Error(`Erro ao processar JSON: ${error}, Resposta: ${responseText.substring(0, 100)}...`);
+            }
+
             if (data.success) {
                 setTransactions(data.transactions || []);
                 setTotalPages(data.pagination?.totalPages || 1);

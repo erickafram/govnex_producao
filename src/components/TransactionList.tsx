@@ -2,12 +2,12 @@
 import React from "react";
 import { Transaction } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ArrowDownCircle, 
-  ArrowUpCircle, 
-  Clock, 
-  CheckCircle, 
-  XCircle 
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Clock,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -80,16 +80,16 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
                 </div>
                 <div className="flex flex-col items-end">
                   <p className={`font-semibold ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                    {transaction.type === 'deposit' ? '+' : '-'} 
+                    {transaction.type === 'deposit' ? '+' : '-'}
                     R$ {transaction.amount.toFixed(2)}
                   </p>
                   <Badge variant="outline" className={statusVariants[transaction.status]}>
                     <span className="flex items-center gap-1">
                       {statusIcons[transaction.status as keyof typeof statusIcons]}
                       <span className="capitalize">
-                        {transaction.status === 'pending' ? 'Pendente' : 
-                         transaction.status === 'completed' ? 'Concluído' : 
-                         transaction.status === 'failed' ? 'Falhou' : 'Expirado'}
+                        {transaction.status === 'pending' ? 'Pendente' :
+                          transaction.status === 'completed' ? 'Concluído' :
+                            transaction.status === 'failed' ? 'Falhou' : 'Expirado'}
                       </span>
                     </span>
                   </Badge>

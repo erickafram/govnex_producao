@@ -2,3 +2,7 @@
 2025-04-08 16:46:58 - Database connection successful
 2025-04-08 16:46:58 - Processing GET request to list tokens
 2025-04-08 16:46:58 - Retrieved 2 tokens
+2025-04-09 03:23:50 - Request received: GET
+2025-04-09 03:23:50 - Database connection successful
+2025-04-09 03:23:50 - Processing GET request to list tokens
+2025-04-09 03:23:50 - Retrieved 1 tokens
