@@ -7,11 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Copy, Check, RefreshCw } from "lucide-react";
+import { Loader2, Copy, Check, RefreshCw, AlertTriangle, Send, AlertCircle } from "lucide-react";
 import { maskCPF } from "@/lib/utils";
+import { API_URL } from "@/config";
 
-// API URL
-const API_URL = "/api";
+// Definir tipos para NodeJS
+declare namespace NodeJS {
+  interface Timeout { }
+  interface Timer { }
+}
 
 const Recarga = () => {
   const { user, updateUser } = useAuth();
@@ -28,6 +32,7 @@ const Recarga = () => {
   const [error, setError] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(120); // 2 minutos em segundos
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [qrCodeError, setQrCodeError] = useState<boolean>(false);
 
   useEffect(() => {
     // Pre-fill name if user is logged in
@@ -47,7 +52,7 @@ const Recarga = () => {
       }
     };
   }, [statusInterval, timerInterval]);
-  
+
   // Efeito para atualizar o temporizador
   useEffect(() => {
     if (paymentData && timeLeft > 0) {
@@ -67,9 +72,9 @@ const Recarga = () => {
           return prev - 1;
         });
       }, 1000);
-      
+
       setTimerInterval(timer);
-      
+
       return () => clearInterval(timer);
     }
   }, [paymentData]);
@@ -87,10 +92,12 @@ const Recarga = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setError("");
       setLoading(true);
+
+      console.log('Enviando requisição para:', `${API_URL}/create_payment.php`);
 
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/create_payment.php`, {
@@ -115,7 +122,7 @@ const Recarga = () => {
       }
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || "Erro ao processar pagamento");
       }
@@ -131,7 +138,7 @@ const Recarga = () => {
         const interval = setInterval(() => {
           checkPaymentStatus(data.transaction_id);
         }, 10000); // Check every 10 seconds
-        
+
         setStatusInterval(interval);
       } else {
         setError(data.message || "Erro ao criar pagamento");
@@ -170,7 +177,7 @@ const Recarga = () => {
 
       const data = await response.json();
       console.log('Resposta da verificação de pagamento:', data);
-      
+
       if (data.success && data.payment && data.payment.status === "pago") {
         // Payment confirmed
         toast({
@@ -210,7 +217,7 @@ const Recarga = () => {
       navigator.clipboard.writeText(paymentData.pix_code);
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
-      
+
       toast({
         title: "Código copiado!",
         description: "O código PIX foi copiado para a área de transferência",
@@ -224,6 +231,11 @@ const Recarga = () => {
       clearInterval(statusInterval);
       setStatusInterval(null);
     }
+  };
+
+  const handleQrCodeError = () => {
+    console.error("Erro ao carregar a imagem do QR Code");
+    setQrCodeError(true);
   };
 
   if (!user) {
@@ -349,12 +361,121 @@ const Recarga = () => {
                   </div>
                 </div>
 
-                <div className="border p-4 rounded-lg mb-4">
-                  <img
-                    src={`/temp/qrcode_${paymentData.transaction_id}.png`}
-                    alt="QR Code PIX"
-                    className="w-64 h-64 mx-auto"
-                  />
+                <div className="border p-4 rounded-lg mb-4 relative">
+                  {qrCodeError ? (
+                    <div className="w-64 h-64 mx-auto flex flex-col items-center justify-center bg-gray-100">
+                      <AlertTriangle className="h-12 w-12 text-yellow-500 mb-2" />
+                      <p className="text-sm text-center text-gray-700">
+                        Não foi possível carregar o QR Code.
+                        <br />
+                        Use a opção "Copia e Cola" abaixo.
+                      </p>
+                      <div className="mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // Tentar gerar QR code usando serviço direto
+                            setQrCodeError(false);
+                            const dynamicUrl = `${API_URL}/serve_qrcode.php?transaction_id=${paymentData.transaction_id}`;
+                            window.open(dynamicUrl, '_blank');
+                          }}
+                        >
+                          Gerar QR Code Externo
+                        </Button>
+                      </div>
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // Teste de diagnóstico da biblioteca
+                            window.open(`${API_URL}/test_qrcode_generation.php`, '_blank');
+                          }}
+                        >
+                          Testar Biblioteca QR
+                        </Button>
+                      </div>
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // Ver todos os QR codes
+                            window.open(`${API_URL}/html_test_qrcode.php`, '_blank');
+                          }}
+                        >
+                          Ver Todos QR Codes
+                        </Button>
+                      </div>
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // Teste completo de arquivos
+                            window.open(`${API_URL}/test_file_transfer.php`, '_blank');
+                          }}
+                        >
+                          Diagnóstico Completo
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Tentativa 1: Usar a URL retornada pela API */}
+                      {paymentData.qr_code_url && (
+                        <img
+                          src={`${API_URL}/redirect_to_qrcode.php?transaction_id=${paymentData.transaction_id}`}
+                          alt="QR Code PIX (direto)"
+                          className="w-64 h-64 mx-auto"
+                          onError={(e) => {
+                            console.error("Erro ao carregar QR Code (método 1)");
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+
+                      {/* Tentativa 2: Caminho direto baseado no transaction_id */}
+                      <img
+                        src={`${API_URL}/redirect_to_qrcode.php?transaction_id=${paymentData.transaction_id}`}
+                        alt="QR Code PIX (via ID)"
+                        className="w-64 h-64 mx-auto"
+                        style={{ display: 'none' }}
+                        onLoad={(e) => {
+                          console.log("QR Code carregado com sucesso (método 2)");
+                          e.currentTarget.style.display = 'block';
+                        }}
+                        onError={(e) => {
+                          console.error("Erro ao carregar QR Code (método 2)");
+                          e.currentTarget.style.display = 'none';
+
+                          // Tentar método 3 (gerar com código personalizado)
+                          const url = `${API_URL}/serve_qrcode.php?transaction_id=${paymentData.transaction_id}`;
+                          const img3 = document.createElement('img');
+                          img3.src = url;
+                          img3.alt = "QR Code PIX (Geração Dinâmica)";
+                          img3.className = "w-64 h-64 mx-auto";
+
+                          img3.onload = () => {
+                            console.log("QR Code carregado com sucesso (método 3 - Geração Dinâmica)");
+                            const container = document.querySelector('.border.p-4.rounded-lg.mb-4.relative');
+                            if (container) {
+                              container.appendChild(img3);
+                            } else {
+                              console.error("Container para QR code não encontrado");
+                            }
+                          };
+
+                          img3.onerror = () => {
+                            console.error("Erro ao carregar QR Code (método 3)");
+                            // Se todas as tentativas falharem, mostrar erro
+                            setQrCodeError(true);
+                          };
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
 
                 <div className="w-full space-y-2">

@@ -355,3 +355,18 @@ Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_payments.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_consultas.php, usando modo de desenvolvimento
 Nenhum token recebido em admin_users.php, usando modo de desenvolvimento
+Token recebido em update_profile.php: e72741b52798eb86d83a80fba336b726aad1425e36e3a1249cf67a9d657f2795
+Token recebido em update_profile.php: f74f58b0723bf6688938ea84e475201c794817edbad96085e1d048d5c1885a51
+Token recebido em update_profile.php: f74f58b0723bf6688938ea84e475201c794817edbad96085e1d048d5c1885a51
+Token recebido em update_profile.php: f74f58b0723bf6688938ea84e475201c794817edbad96085e1d048d5c1885a51
+Token recebido em update_profile.php: b0b2be825d1d8de944f353ee96b107d16c92c97b603f5b8aa0827d4d1a842461
+Token recebido em update_profile.php: 80bdc4466cf709f185616455f2d852aa8199ba8ebfbf23a9732c021d37a05b41
+Token recebido em update_profile.php: 15c9799f24146a2c5a3a07485695c49de32cbaea63faef69ed88746b4f2f220e
+Token recebido em update_profile.php: 15c9799f24146a2c5a3a07485695c49de32cbaea63faef69ed88746b4f2f220e
+Token recebido em update_profile.php: 15c9799f24146a2c5a3a07485695c49de32cbaea63faef69ed88746b4f2f220e
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Token recebido em update_profile.php: 885d287c13a881cddad0c64967c9e9cde9869915e289b1f465a25b4a02b269c2
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento
+Nenhum token recebido em update_user.php, usando modo de desenvolvimento
+Token recebido em update_profile.php: 4715198f74cb2c13268341da5eecf88fdda97c734f26181cf19f6e5a25ed9b80
+Nenhum token recebido em manage_users.php, usando modo de desenvolvimento

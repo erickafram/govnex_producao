@@ -127,10 +127,22 @@ try {
     }
     
     // Verificar se o documento já está em uso por outro usuário
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE (cpf = :document OR cnpj = :document) AND id != :id");
-    $stmt->bindParam(':document', $data['document']);
-    $stmt->bindParam(':id', $data['userId']);
-    $stmt->execute();
+    // Determinar o tipo do documento para fazer a verificação adequada
+    $documentoNumerico = preg_replace('/[^0-9]/', '', $data['document']);
+    
+    if (strlen($documentoNumerico) <= 11) {
+        // É um CPF
+        $stmt = $conn->prepare("SELECT id FROM usuarios WHERE cpf = :document AND id != :id");
+        $stmt->bindParam(':document', $data['document']);
+        $stmt->bindParam(':id', $data['userId']);
+        $stmt->execute();
+    } else {
+        // É um CNPJ
+        $stmt = $conn->prepare("SELECT id FROM usuarios WHERE cnpj = :document AND id != :id");
+        $stmt->bindParam(':document', $data['document']);
+        $stmt->bindParam(':id', $data['userId']);
+        $stmt->execute();
+    }
     
     if ($stmt->rowCount() > 0) {
         http_response_code(400);
@@ -149,13 +161,21 @@ try {
     $cpf = null;
     $cnpj = null;
     
-    // Remover caracteres não numéricos
-    $documentoNumerico = preg_replace('/[^0-9]/', '', $data['document']);
+    // Buscar dados atuais do usuário para verificar se já possui CPF e CNPJ
+    $stmt = $conn->prepare("SELECT cpf, cnpj FROM usuarios WHERE id = :id");
+    $stmt->bindParam(':id', $data['userId']);
+    $stmt->execute();
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
     
+    // Verificar o tipo de documento e se o usuário já tem CPF e CNPJ
     if (strlen($documentoNumerico) <= 11) {
         $cpf = $data['document'];
+        // Se o usuário tinha CNPJ, manter o valor
+        $cnpj = $userData['cnpj'];
     } else {
         $cnpj = $data['document'];
+        // Se o usuário tinha CPF, manter o valor
+        $cpf = $userData['cpf'];
     }
     
     // Obter os valores dos parâmetros
@@ -170,8 +190,8 @@ try {
     // 1. Atualizar campos básicos (nome, email, cpf, cnpj)
     $basicSql = "UPDATE usuarios SET 
                 nome = :name, 
-                email = :email, 
-                cpf = :cpf, 
+                email = :email,
+                cpf = :cpf,
                 cnpj = :cnpj
                 WHERE id = :id";
     
@@ -194,29 +214,31 @@ try {
     $basicResult = $basicStmt->execute();
     
     if (!$basicResult) {
-        throw new PDOException("Erro ao atualizar campos básicos");
+        throw new PDOException("Erro ao atualizar campos básicos: " . implode(", ", $basicStmt->errorInfo()));
     }
     
     // 2. Atualizar telefone
-    $phoneSql = "UPDATE usuarios SET telefone = :phone WHERE id = :id";
-    $phoneStmt = $conn->prepare($phoneSql);
-    $phoneStmt->bindParam(':phone', $phone);
-    $phoneStmt->bindParam(':id', $userId);
-    
-    logDebug("SQL telefone", $phoneSql);
-    logDebug("Parâmetros telefone", [
-        'phone' => $phone,
-        'id' => $userId
-    ]);
-    
-    $phoneResult = $phoneStmt->execute();
-    
-    if (!$phoneResult) {
-        logDebug("Erro ao atualizar telefone");
+    if ($phone !== null) {
+        $phoneSql = "UPDATE usuarios SET telefone = :phone WHERE id = :id";
+        $phoneStmt = $conn->prepare($phoneSql);
+        $phoneStmt->bindParam(':phone', $phone);
+        $phoneStmt->bindParam(':id', $userId);
+        
+        logDebug("SQL telefone", $phoneSql);
+        logDebug("Parâmetros telefone", [
+            'phone' => $phone,
+            'id' => $userId
+        ]);
+        
+        $phoneResult = $phoneStmt->execute();
+        
+        if (!$phoneResult) {
+            logDebug("Erro ao atualizar telefone: " . implode(", ", $phoneStmt->errorInfo()));
+        }
     }
     
     // 3. Atualizar domínio apenas se não for admin ou se for admin e forneceu o domínio
-    if (!$isAdmin || isset($data['domain'])) {
+    if ($domain !== null && (!$isAdmin || isset($data['domain']))) {
         $domainSql = "UPDATE usuarios SET dominio = :domain WHERE id = :id";
         $domainStmt = $conn->prepare($domainSql);
         $domainStmt->bindParam(':domain', $domain);
@@ -231,7 +253,7 @@ try {
         $domainResult = $domainStmt->execute();
         
         if (!$domainResult) {
-            logDebug("Erro ao atualizar domínio");
+            logDebug("Erro ao atualizar domínio: " . implode(", ", $domainStmt->errorInfo()));
         }
     }
     
@@ -241,6 +263,8 @@ try {
             id, 
             nome as name, 
             email, 
+            cpf,
+            cnpj,
             COALESCE(cpf, cnpj) as document, 
             telefone as phone, 
             dominio as domain, 
@@ -276,33 +300,32 @@ try {
         ]);
     }
 } catch (PDOException $e) {
-    // Log detalhado para erros
-    $errorMessage = "===== ERRO " . date('Y-m-d H:i:s') . " =====\n";
-    $errorMessage .= "Código: " . $e->getCode() . "\n";
-    $errorMessage .= "Mensagem: " . $e->getMessage() . "\n";
-    
-    // Verificar se as variáveis estão definidas antes de usá-las
-    if (isset($basicSql)) {
-        $errorMessage .= "SQL Básico: " . $basicSql . "\n";
-    }
-    if (isset($phoneSql)) {
-        $errorMessage .= "SQL Telefone: " . $phoneSql . "\n";
-    }
-    if (isset($domainSql)) {
-        $errorMessage .= "SQL Domínio: " . $domainSql . "\n";
-    }
-    
-    if (isset($stmt) && $stmt instanceof PDOStatement) {
-        $errorInfo = $stmt->errorInfo();
-        $errorMessage .= "SQL Error: " . print_r($errorInfo, true) . "\n";
-    }
-    
-    $errorMessage .= "\n";
-    
-    // Usar file_put_contents com verificação de erro
-    @file_put_contents(__DIR__ . '/profile_errors.log', $errorMessage, FILE_APPEND);
-    
+    logDebug("Erro PDO", $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Erro ao atualizar perfil: ' . $e->getMessage()]);
+    
+    // Evitar vazamento de informações sensíveis em produção
+    if (strpos($_SERVER['SERVER_NAME'], 'localhost') !== false || 
+        strpos($_SERVER['SERVER_NAME'], '127.0.0.1') !== false || 
+        strpos($_SERVER['SERVER_NAME'], '161.35.60.249') !== false) {
+        // Ambiente de desenvolvimento - mostrar mensagem detalhada
+        echo json_encode(['error' => 'Erro ao atualizar perfil: ' . $e->getMessage()]);
+    } else {
+        // Ambiente de produção - mensagem genérica
+        echo json_encode(['error' => 'Erro ao atualizar perfil. Por favor, tente novamente mais tarde.']);
+    }
+} catch (Exception $e) {
+    logDebug("Erro geral", $e->getMessage());
+    http_response_code(500);
+    
+    // Evitar vazamento de informações sensíveis em produção
+    if (strpos($_SERVER['SERVER_NAME'], 'localhost') !== false || 
+        strpos($_SERVER['SERVER_NAME'], '127.0.0.1') !== false || 
+        strpos($_SERVER['SERVER_NAME'], '161.35.60.249') !== false) {
+        // Ambiente de desenvolvimento - mostrar mensagem detalhada
+        echo json_encode(['error' => 'Erro ao processar a requisição: ' . $e->getMessage()]);
+    } else {
+        // Ambiente de produção - mensagem genérica
+        echo json_encode(['error' => 'Erro no sistema. Por favor, tente novamente mais tarde.']);
+    }
 }
 ?>

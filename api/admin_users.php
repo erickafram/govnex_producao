@@ -93,3 +93,79 @@ try {
 }
 
 // Não é necessário fechar a conexão PDO, ela será fechada automaticamente quando o script terminar
+          id, 
+            nome, 
+            email, 
+            telefone, 
+            cpf, 
+            cnpj, 
+            dominio, 
+            nivel_acesso, 
+            credito, 
+            data_cadastro,
+            (SELECT COUNT(*) FROM consultas_log WHERE usuario_id = usuarios.id) as total_consultas
+        FROM usuarios
+    ";
+    
+    // Adicionar cláusula WHERE se houver busca
+    $query .= $whereClause;
+    
+    // Adicionar ordenação e paginação
+    $query .= " ORDER BY $orderBy $orderDir LIMIT :offset, :perPage";
+    
+    $stmt = $conn->prepare($query);
+    foreach ($params as $param => $value) {
+        $stmt->bindValue($param, $value);
+    }
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':perPage', $perPage, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $users = [];
+    
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Formatar documento principal
+        $documento = !empty($row['cpf']) ? $row['cpf'] : $row['cnpj'];
+        
+        $users[] = [
+            'id' => $row['id'],
+            'name' => $row['nome'],
+            'email' => $row['email'],
+            'phone' => $row['telefone'],
+            'document' => $documento,
+            'cpf' => $row['cpf'],
+            'cnpj' => $row['cnpj'],
+            'domain' => $row['dominio'],
+            'accessLevel' => $row['nivel_acesso'],
+            'balance' => floatval($row['credito']),
+            'consultas' => intval($row['total_consultas']),
+            'createdAt' => $row['data_cadastro']
+        ];
+    }
+    
+    // Calcular total de páginas
+    $totalPages = ceil($totalUsers / $perPage);
+    
+    // Retornar resposta
+    echo json_encode([
+        'success' => true,
+        'users' => $users,
+        'pagination' => [
+            'total' => $totalUsers,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'last_page' => $totalPages,
+            'from' => $offset + 1,
+            'to' => min($offset + $perPage, $totalUsers)
+        ]
+    ]);
+    
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro no banco de dados: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro ao processar requisição: ' . $e->getMessage()]);
+}
+
+// Não é necessário fechar a conexão PDO, ela será fechada automaticamente quando o script terminar

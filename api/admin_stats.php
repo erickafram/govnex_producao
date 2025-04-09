@@ -136,3 +136,24 @@ try {
 }
 
 // Não é necessário fechar a conexão PDO, ela será fechada automaticamente quando o script terminar
+: ' . $e->getMessage()]);
+}
+
+// Não é necessário fechar a conexão PDO, ela será fechada automaticamente quando o script terminar
+semana'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // Retornar estatísticas
+    echo json_encode([
+        'success' => true,
+        'stats' => $stats
+    ]);
+    
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro no banco de dados: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro ao processar requisição: ' . $e->getMessage()]);
+}
+
+// Não é necessário fechar a conexão PDO, ela será fechada automaticamente quando o script terminar

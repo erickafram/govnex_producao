@@ -1,0 +1,33 @@
+# Permitir visualização dos arquivos na pasta temp
+Options +Indexes
+Options +FollowSymLinks
+
+# Permitir acesso a todos os visitantes
+Order allow,deny
+Allow from all
+Require all granted
+
+# Desativar a execução de PHP neste diretório
+<FilesMatch "\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Configurar CORS para arquivos de imagem
+<IfModule mod_headers.c>
+    <FilesMatch "\.(png|jpg|jpeg|gif)$">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, OPTIONS"
+    </FilesMatch>
+</IfModule>
+
+# Definir tipos MIME para arquivos de imagem
+AddType image/png .png
+AddType image/jpeg .jpg .jpeg
+AddType image/gif .gif
+
+# Garantir que as imagens não sejam tratadas como scripts PHP
+<FilesMatch "\.(png|jpg|jpeg|gif)$">
+    SetHandler None
+    ForceType None
+</FilesMatch> 

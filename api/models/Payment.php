@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 
 class Payment
 {
@@ -99,20 +99,87 @@ class Payment
             }
 
             // Gerar QR Code
-            $qrCode = new QrCode($paymentResponse['pixCopiaECola']);
-            $writer = new PngWriter();
-            $qrImage = $writer->write($qrCode);
-
-            // Salvar QR Code temporariamente
-            $tempDir = __DIR__ . '/../../temp';
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0755, true);
+            try {
+                // Verificar qual versão da biblioteca está disponível
+                $isVersion3 = class_exists('Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh');
+                $isVersion2 = class_exists('Endroid\QrCode\ErrorCorrectionLevel');
+                
+                // Criar e configurar o QR code de acordo com a versão
+                $qrCode = new QrCode($paymentResponse['pixCopiaECola']);
+                $qrCode->setSize(300);
+                $qrCode->setMargin(10);
+                
+                if ($isVersion3) {
+                    $qrCode->setErrorCorrectionLevel(new ErrorCorrectionLevelHigh());
+                } else {
+                    // Tentar usar a versão 2 da API se disponível
+                    if ($isVersion2) {
+                        $qrCode->setErrorCorrectionLevel(\Endroid\QrCode\ErrorCorrectionLevel::HIGH);
+                    }
+                }
+                
+                $writer = new PngWriter();
+                $qrImage = $writer->write($qrCode);
+                
+                // Salvar QR Code temporariamente
+                $tempDir = __DIR__ . '/../../temp';
+                if (!file_exists($tempDir)) {
+                    mkdir($tempDir, 0777, true); // Usar 0777 para garantir permissões completas
+                    chmod($tempDir, 0777); // Definir permissões explicitamente
+                }
+                $qrPath = $tempDir . '/qrcode_' . $paymentResponse['id'] . '.png';
+                file_put_contents($qrPath, $qrImage->getString());
+                chmod($qrPath, 0644); // Definir permissões para o arquivo
+                
+                // Registrar log para depuração
+                $this->logError("QR Code salvo em: " . $qrPath);
+                $this->logError("Permissões do diretório temp: " . substr(sprintf('%o', fileperms($tempDir)), -4));
+                $this->logError("Permissões do arquivo QR code: " . substr(sprintf('%o', fileperms($qrPath)), -4));
+            } catch (Exception $e) {
+                // Se falhar com a biblioteca Endroid, usar o Google Charts API como fallback
+                $this->logError("Erro ao gerar QR code com Endroid: " . $e->getMessage());
+                
+                try {
+                    // Usar Google Charts API para gerar o QR code
+                    $pixCode = urlencode($paymentResponse['pixCopiaECola']);
+                    $size = 300;
+                    $qrCodeUrl = "https://chart.googleapis.com/chart?chs={$size}x{$size}&cht=qr&chl={$pixCode}&choe=UTF-8";
+                    
+                    $qrCodeImage = file_get_contents($qrCodeUrl);
+                    
+                    if ($qrCodeImage === false) {
+                        throw new Exception("Não foi possível obter a imagem do QR code do serviço Google Charts");
+                    }
+                    
+                    // Salvar a imagem obtida
+                    $tempDir = __DIR__ . '/../../temp';
+                    if (!file_exists($tempDir)) {
+                        mkdir($tempDir, 0777, true);
+                        chmod($tempDir, 0777);
+                    }
+                    
+                    $qrPath = $tempDir . '/qrcode_' . $paymentResponse['id'] . '.png';
+                    file_put_contents($qrPath, $qrCodeImage);
+                    chmod($qrPath, 0644);
+                    
+                    $this->logError("QR Code gerado com sucesso usando Google Charts API");
+                } catch (Exception $fallbackException) {
+                    $this->logError("Também falhou o fallback para Google Charts: " . $fallbackException->getMessage());
+                    // Continuar sem QR code, o usuário terá que usar o código PIX text
+                }
             }
-            $qrPath = $tempDir . '/qrcode_' . $paymentResponse['id'] . '.png';
-            file_put_contents($qrPath, $qrImage->getString());
-            
-            // Registrar log para depuração
-            $this->logError("QR Code salvo em: " . $qrPath);
+
+            // Verificar ambiente para definir o caminho correto do QR code
+            $isProduction = (
+                isset($_SERVER['SERVER_NAME']) && 
+                (strpos($_SERVER['SERVER_NAME'], '161.35.60.249') !== false || 
+                strpos($_SERVER['SERVER_NAME'], 'govnex.site') !== false)
+            );
+
+            // Usar o caminho correto para o QR code de acordo com o ambiente
+            $qrCodeUrl = $isProduction 
+                ? '/temp/qrcode_' . $paymentResponse['id'] . '.png'
+                : '/temp/qrcode_' . $paymentResponse['id'] . '.png';
 
             // Registrar a transação no banco de dados
             try {
@@ -131,7 +198,7 @@ class Payment
 
             return [
                 'success' => true,
-                'qr_code_url' => '/react/govnex/novogovnex/pix-credit-nexus/temp/qrcode_' . $paymentResponse['id'] . '.png',
+                'qr_code_url' => $qrCodeUrl,
                 'transaction_id' => $paymentResponse['id'],
                 'pix_code' => $paymentResponse['pixCopiaECola']
             ];

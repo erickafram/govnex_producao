@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   console.log(`Modo: ${mode}, Variáveis de ambiente carregadas:`, env);
-  
+
   // Determinar se estamos em produção
   const isProd = mode === 'production';
   console.log(`Ambiente: ${isProd ? 'Produção' : 'Desenvolvimento'}`);
@@ -25,13 +25,8 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path) => {
-            if (isProd) {
-              // Em produção, simplesmente remover o prefixo /api
-              return path.replace(/^\/api/, '/api');
-            } else {
-              // Em desenvolvimento, manter o caminho original
-              return path.replace(/^\/api/, '/react/govnex_producao/api');
-            }
+            // Sempre redirecionar para o caminho correto da API
+            return path.replace(/^\/api/, '/api');
           },
           configure: (proxy, _options) => {
             proxy.on('error', (err, _req, _res) => {
@@ -47,15 +42,23 @@ export default defineConfig(({ mode }) => {
         },
         // Proxy para a pasta temp (QR codes)
         '/temp': {
-          target: 'http://localhost:80',
+          target: isProd ? 'http://161.35.60.249' : 'http://localhost:80',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => {
-            if (isProd) {
-              return path.replace(/^\/temp/, '/temp');
-            } else {
-              return path.replace(/^\/temp/, '/react/govnex_producao/temp');
-            }
+            // Não modificar o caminho, manter /temp
+            return path;
+          },
+          configure: (proxy, _options) => {
+            proxy.on('error', (err, _req, _res) => {
+              console.log('temp proxy error', err);
+            });
+            proxy.on('proxyReq', (proxyReq, req, _res) => {
+              console.log('Enviando requisição para temp:', req.method, req.url);
+            });
+            proxy.on('proxyRes', (proxyRes, req, _res) => {
+              console.log('Recebendo resposta de temp:', req.method, req.url, 'status:', proxyRes.statusCode);
+            });
           }
         }
       }

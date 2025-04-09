@@ -34,15 +34,35 @@ const UserProfile = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [documentType, setDocumentType] = useState("CPF/CNPJ");
 
   // Inicializar dados do perfil quando o usuário estiver disponível
   useEffect(() => {
     if (user) {
       console.log("Dados do usuário:", user);
+
+      // Determinar o documento principal a mostrar (preferir CPF se ambos estiverem disponíveis)
+      let documentToShow = "";
+      let docType = "CPF/CNPJ";
+
+      if (user.cpf && user.cpf.trim() !== "") {
+        documentToShow = user.cpf;
+        docType = "CPF";
+      } else if (user.cnpj && user.cnpj.trim() !== "") {
+        documentToShow = user.cnpj;
+        docType = "CNPJ";
+      } else if (user.document) {
+        documentToShow = user.document;
+        // Inferir o tipo do documento pelo tamanho
+        const numericDoc = documentToShow.replace(/[^\d]/g, '');
+        docType = numericDoc.length <= 11 ? "CPF" : "CNPJ";
+      }
+
+      setDocumentType(docType);
       setProfileData({
         name: user.name || "",
         email: user.email || "",
-        document: user.document || "",
+        document: documentToShow,
         phone: user.phone || "",
         domain: user.domain || user.dominio || ""
       });
@@ -50,6 +70,18 @@ const UserProfile = () => {
       navigate("/login");
     }
   }, [user, navigate]);
+
+  // Detectar alterações no documento para atualizar o tipo
+  useEffect(() => {
+    if (profileData.document) {
+      const numericDoc = profileData.document.replace(/[^\d]/g, '');
+      if (numericDoc.length <= 11) {
+        setDocumentType("CPF");
+      } else {
+        setDocumentType("CNPJ");
+      }
+    }
+  }, [profileData.document]);
 
   // Atualizar dados do perfil
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -74,6 +106,9 @@ const UserProfile = () => {
         domain: profileData.domain
       });
 
+      // Limpar formatação do documento (remover caracteres não numéricos)
+      const cleanDocument = profileData.document.replace(/[^\d]/g, '');
+
       const response = await fetch(getApiUrl('update_profile.php'), {
         method: "POST",
         headers: {
@@ -84,7 +119,7 @@ const UserProfile = () => {
           userId: user.id,
           name: profileData.name,
           email: profileData.email,
-          document: profileData.document,
+          document: cleanDocument, // Enviar documento sem formatação
           phone: profileData.phone,
           domain: profileData.domain
         })
@@ -120,17 +155,25 @@ const UserProfile = () => {
       // Melhorar a mensagem de erro para o usuário
       let errorMessage = "Não foi possível atualizar o perfil";
       if (error instanceof Error) {
-        // Mostrar a mensagem de erro completa
+        console.error("Erro ao atualizar perfil:", error);
+
+        // Extrair mensagem de erro para mostrar ao usuário
         errorMessage = error.message;
 
-        // Se a mensagem contiver "SQLSTATE", extrair apenas a parte relevante para o usuário
-        if (errorMessage.includes("SQLSTATE")) {
+        // Tratar erros específicos
+        if (errorMessage.includes("SQLSTATE[HY093]")) {
+          errorMessage = "Erro de parâmetros no banco de dados. Por favor, verifique se todos os campos estão preenchidos corretamente.";
+        } else if (errorMessage.includes("email já está em uso")) {
+          errorMessage = "Este e-mail já está sendo usado por outro usuário. Por favor, use um e-mail diferente.";
+        } else if (errorMessage.includes("CPF/CNPJ já está em uso")) {
+          errorMessage = "Este CPF/CNPJ já está registrado por outro usuário.";
+        } else if (errorMessage.includes("SQLSTATE")) {
           errorMessage = "Erro no banco de dados. Por favor, verifique seus dados e tente novamente mais tarde.";
         }
       }
 
       toast({
-        title: "Erro",
+        title: "Erro ao atualizar perfil",
         description: errorMessage,
         variant: "destructive",
       });
@@ -273,13 +316,16 @@ const UserProfile = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="document">CPF/CNPJ</Label>
+                      <Label htmlFor="document">{documentType}</Label>
                       <Input
                         id="document"
                         value={profileData.document}
                         onChange={(e) => setProfileData({ ...profileData, document: e.target.value })}
                         required
                       />
+                      <p className="text-xs text-muted-foreground">
+                        {documentType === "CPF" ? "Formato: 000.000.000-00" : "Formato: 00.000.000/0000-00"}
+                      </p>
                     </div>
 
                     <div className="space-y-2">

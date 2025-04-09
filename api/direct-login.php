@@ -3,16 +3,15 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// First load CORS and other requirements with absolute paths
-require_once __DIR__ . '/config/database.php';
-
 // Create logs directory if it doesn't exist
-if (!is_dir(__DIR__ . '/logs')) {
-    mkdir(__DIR__ . '/logs', 0777, true);
+$logsDir = __DIR__ . '/logs';
+if (!is_dir($logsDir)) {
+    mkdir($logsDir, 0777, true);
+    chmod($logsDir, 0777); // Ensure directory is writable
 }
 
 // Log file for debugging
-$logFile = __DIR__ . '/logs/login_log.txt';
+$logFile = $logsDir . '/login_log.txt';
 
 // Function to log messages
 function logMessage($message) {
@@ -26,6 +25,9 @@ logMessage("Request received");
 logMessage("Request Method: " . $_SERVER['REQUEST_METHOD']);
 logMessage("Content Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'Not set'));
 logMessage("Raw input: " . file_get_contents('php://input'));
+
+// First load database connection
+require_once __DIR__ . '/config/database.php';
 
 // Set headers for CORS and JSON response
 header("Access-Control-Allow-Origin: *");

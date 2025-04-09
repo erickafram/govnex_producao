@@ -9,106 +9,116 @@ class Database {
     private $isProduction;
 
     public function __construct() {
-        // Criar diretório de logs se não existir
+        // Create logs directory if it doesn't exist
         $logDir = __DIR__ . '/../logs';
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
+            chmod($logDir, 0777); // Ensure directory is writable
         }
 
-        // Detectar ambiente
-        $this->isProduction = (
-            isset($_SERVER['SERVER_NAME']) && 
+        // Detect environment - check for server IP, hostname, or use a fallback to .env file
+        $this->isProduction = false;
+        
+        if (isset($_SERVER['SERVER_NAME']) && 
             (strpos($_SERVER['SERVER_NAME'], '161.35.60.249') !== false || 
-             strpos($_SERVER['SERVER_NAME'], 'govnex.site') !== false)
-        );
+             strpos($_SERVER['SERVER_NAME'], 'govnex.site') !== false)) {
+            $this->isProduction = true;
+        } elseif (isset($_SERVER['SERVER_ADDR']) && $_SERVER['SERVER_ADDR'] === '161.35.60.249') {
+            $this->isProduction = true;
+        } elseif (isset($_SERVER['HTTP_HOST']) && 
+            (strpos($_SERVER['HTTP_HOST'], '161.35.60.249') !== false || 
+             strpos($_SERVER['HTTP_HOST'], 'govnex.site') !== false)) {
+            $this->isProduction = true;
+        } elseif (file_exists(__DIR__ . '/../../.env.production')) {
+            // If a production env file exists, we're likely in production
+            $this->isProduction = true;
+        }
 
-        // Carregar variáveis do arquivo .env na raiz
+        // Load environment variables
         $this->loadEnvVars();
         
-        // Log das configurações
+        // Log configuration
         $this->logDebugInfo();
     }
 
     private function loadEnvVars() {
-        // Selecionar o arquivo .env apropriado
-        $envFile = $this->isProduction 
-            ? __DIR__ . '/../../.env.production' 
-            : __DIR__ . '/../../.env';
+        // Check for production environment file first
+        $prodEnvFile = __DIR__ . '/../.env.production';
+        $devEnvFile = __DIR__ . '/../.env';
         
-        // Valores padrão para desenvolvimento local (WAMP/XAMPP)
-        if (!$this->isProduction) {
-            // No ambiente local, sempre usar root com senha vazia
+        // Set default values
+        if ($this->isProduction) {
+            // Default production values
             $this->host = 'localhost';
             $this->db_name = 'govnex';
             $this->username = 'root';
-            $this->password = '';
+            $this->password = 'Senha@Forte2025!';
             $this->port = '3306';
+            
+            // Try to load from production env file
+            if (file_exists($prodEnvFile)) {
+                $this->loadFromEnvFile($prodEnvFile);
+            } elseif (file_exists($devEnvFile)) {
+                // Fall back to dev env if production doesn't exist
+                $this->loadFromEnvFile($devEnvFile);
+            }
         } else {
-            // Valores padrão para produção
+            // Default development values for local WAMP/XAMPP
             $this->host = 'localhost';
             $this->db_name = 'govnex';
-            $this->username = 'govnex';
-            $this->password = '@@2025@@Ekb';
+            $this->username = 'root';
+            $this->password = 'root@@2025@@';
             $this->port = '3306';
+            
+            // Try to load from dev env file
+            if (file_exists($devEnvFile)) {
+                $this->loadFromEnvFile($devEnvFile);
+            }
         }
         
-        // Se existir arquivo .env, leia as configurações dele
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                // Ignorar comentários
-                if (strpos(trim($line), '#') === 0) {
-                    continue;
+        $this->logMessage("Database configuration loaded. Host: {$this->host}, DB: {$this->db_name}, User: {$this->username}, Port: {$this->port}, Production: " . ($this->isProduction ? 'Yes' : 'No'));
+    }
+    
+    private function loadFromEnvFile($envFile) {
+        $this->logMessage("Loading configuration from file: $envFile");
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        
+        foreach ($lines as $line) {
+            // Skip comments
+            if (strpos(trim($line), '#') === 0) {
+                continue;
+            }
+            
+            // Process environment variables
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
+                
+                // Remove quotes if they exist
+                if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
+                    $value = substr($value, 1, -1);
+                } elseif (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1) {
+                    $value = substr($value, 1, -1);
                 }
                 
-                // Processar variáveis de ambiente
-                if (strpos($line, '=') !== false) {
-                    list($name, $value) = explode('=', $line, 2);
-                    $name = trim($name);
-                    $value = trim($value);
-                    
-                    // Remover aspas se existirem
-                    if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
-                        $value = substr($value, 1, -1);
-                    } elseif (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1) {
-                        $value = substr($value, 1, -1);
-                    }
-                    
-                    // Configurar variáveis baseadas no nome
-                    // Em ambiente local, ignorar as configurações de usuário do .env
-                    if (!$this->isProduction) {
-                        switch($name) {
-                            case 'DB_HOST':
-                                $this->host = $value;
-                                break;
-                            case 'DB_NAME':
-                                $this->db_name = $value;
-                                break;
-                            case 'DB_PORT':
-                                $this->port = $value;
-                                break;
-                            // Não atualizar username e password em ambiente local
-                        }
-                    } else {
-                        // Em produção, usar todas as configurações do .env
-                        switch($name) {
-                            case 'DB_HOST':
-                                $this->host = $value;
-                                break;
-                            case 'DB_NAME':
-                                $this->db_name = $value;
-                                break;
-                            case 'DB_USER':
-                                $this->username = $value;
-                                break;
-                            case 'DB_PASSWORD':
-                                $this->password = $value;
-                                break;
-                            case 'DB_PORT':
-                                $this->port = $value;
-                                break;
-                        }
-                    }
+                // Configure variables based on name
+                switch($name) {
+                    case 'DB_HOST':
+                        $this->host = $value;
+                        break;
+                    case 'DB_NAME':
+                        $this->db_name = $value;
+                        break;
+                    case 'DB_USER':
+                        $this->username = $value;
+                        break;
+                    case 'DB_PASSWORD':
+                        $this->password = $value;
+                        break;
+                    case 'DB_PORT':
+                        $this->port = $value;
+                        break;
                 }
             }
         }
@@ -117,10 +127,10 @@ class Database {
     private function logDebugInfo() {
         $logFile = __DIR__ . '/../logs/db_log.txt';
         
-        // Informações para debug
+        // Debug information
         $debugInfo = [
-            date('Y-m-d H:i:s') . " - Iniciando conexão com o banco de dados",
-            "Ambiente: " . ($this->isProduction ? "Produção" : "Desenvolvimento"),
+            date('Y-m-d H:i:s') . " - Database connection initialization",
+            "Environment: " . ($this->isProduction ? "Production" : "Development"),
             "Host: " . $this->host,
             "Database: " . $this->db_name,
             "Username: " . $this->username,
@@ -136,10 +146,10 @@ class Database {
 
     public function getConnection() {
         try {
-            // Construir DSN
+            // Build DSN
             $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->db_name};charset=utf8mb4";
             
-            // Opções do PDO
+            // PDO options
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -147,25 +157,27 @@ class Database {
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
             ];
             
-            // Tentar conexão
+            // Try connection
             $this->conn = new PDO($dsn, $this->username, $this->password, $options);
             
-            // Log de sucesso
-            $this->logMessage("Conexão estabelecida com sucesso");
+            // Log success
+            $this->logMessage("Database connection successful");
             
             return $this->conn;
         } catch(PDOException $e) {
-            // Log do erro completo
-            $errorMessage = "Erro de conexão: " . $e->getMessage();
+            // Log detailed error
+            $errorMessage = "Connection error: " . $e->getMessage();
             $this->logMessage($errorMessage);
+            $this->logMessage("DSN: mysql:host={$this->host};port={$this->port};dbname={$this->db_name}");
+            $this->logMessage("Username: {$this->username}");
             
-            // Em ambiente de desenvolvimento, mostrar o erro real
+            // In development, show real error
             if (!$this->isProduction) {
                 throw new PDOException($errorMessage);
             }
             
-            // Em produção, retornar mensagem genérica
-            throw new PDOException("Falha na conexão com o banco de dados");
+            // In production, return generic message
+            throw new PDOException("Database connection failed");
         }
     }
 

@@ -6,3 +6,22 @@
 2025-04-09 03:23:50 - Database connection successful
 2025-04-09 03:23:50 - Processing GET request to list tokens
 2025-04-09 03:23:50 - Retrieved 1 tokens
+2025-04-09 19:26:01 - Request received: GET
+2025-04-09 19:26:01 - Database connection successful
+2025-04-09 19:26:01 - Processing GET request to list tokens
+2025-04-09 19:26:01 - Retrieved 1 tokens
+2025-04-09 19:26:49 - Request received: GET
+2025-04-09 19:26:49 - Database connection successful
+2025-04-09 19:26:49 - Processing GET request to list tokens
+2025-04-09 19:26:49 - Retrieved 1 tokens
+2025-04-09 19:26:53 - Request received: OPTIONS
+2025-04-09 19:26:53 - Request received: PUT
+2025-04-09 19:26:53 - Database connection successful
+2025-04-09 19:26:53 - Processing PUT request to update token
+2025-04-09 19:26:53 - PUT data: {"isActive":false}
+2025-04-09 19:26:53 - Token 3 updated to inactive
+2025-04-09 19:26:55 - Request received: PUT
+2025-04-09 19:26:55 - Database connection successful
+2025-04-09 19:26:55 - Processing PUT request to update token
+2025-04-09 19:26:55 - PUT data: {"isActive":true}
+2025-04-09 19:26:55 - Token 3 updated to active
