@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   console.log(`Modo: ${mode}, Variáveis de ambiente carregadas:`, env);
+  
+  // Determinar se estamos em produção
+  const isProd = mode === 'production';
+  console.log(`Ambiente: ${isProd ? 'Produção' : 'Desenvolvimento'}`);
 
   return {
     server: {
@@ -17,10 +21,18 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API requests to the PHP server
         '/api': {
-          target: 'http://localhost:80', // Usando a porta padrão do Apache
+          target: isProd ? 'http://localhost:80' : 'http://localhost:80',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '/react/govnex_producao/api'), // Corrigido o caminho para apontar para a pasta correta
+          rewrite: (path) => {
+            if (isProd) {
+              // Em produção, simplesmente remover o prefixo /api
+              return path.replace(/^\/api/, '/api');
+            } else {
+              // Em desenvolvimento, manter o caminho original
+              return path.replace(/^\/api/, '/react/govnex_producao/api');
+            }
+          },
           configure: (proxy, _options) => {
             proxy.on('error', (err, _req, _res) => {
               console.log('proxy error', err);
@@ -38,7 +50,13 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:80',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/temp/, '/react/govnex_producao/temp')
+          rewrite: (path) => {
+            if (isProd) {
+              return path.replace(/^\/temp/, '/temp');
+            } else {
+              return path.replace(/^\/temp/, '/react/govnex_producao/temp');
+            }
+          }
         }
       }
     },

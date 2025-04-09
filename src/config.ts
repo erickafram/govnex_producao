@@ -25,14 +25,14 @@ const getApiBaseUrl = () => {
                        window.location.hostname.endsWith('.govnex.site');
   
   if (isProduction) {
-    // Em produção, usar a porta 8000
+    // Em produção, usar o caminho absoluto para a API
     console.log('Ambiente de produção detectado, usando URL de produção');
-    return 'http://161.35.60.249:8000';
+    return 'http://161.35.60.249/api';
   }
   
-  // Em desenvolvimento, usar o proxy configurado no Vite
-  console.log('Ambiente de desenvolvimento detectado, usando proxy');
-  return 'http://localhost:8000';
+  // Em desenvolvimento, usar o caminho absoluto para o Apache local
+  console.log('Ambiente de desenvolvimento detectado, usando caminho local');
+  return 'http://localhost/react/govnex_producao/api';
 };
 
 // URL base da API
