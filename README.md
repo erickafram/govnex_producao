@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # PIX Credit Nexus
 
 Sistema de gerenciamento de créditos PIX com consulta de CNPJ.
@@ -59,9 +60,7 @@ Isso iniciará:
 - Consulta de CNPJ
 - Registro de consultas
 - Painel administrativo
-=======
-# govnex
->>>>>>> 9bbce1bbc22ff7b5a3a206768dc2d074457933e4
-=======
-# govnex
->>>>>>> bf14345237b6a08b15f0f43e95f1501d1de11738
+
+
+
+
