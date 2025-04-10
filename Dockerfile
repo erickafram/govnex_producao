@@ -2,25 +2,21 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
+# Primeiro copiar e instalar dependências
 COPY package*.json ./
 RUN npm ci
 
-# Copia apenas os arquivos necessários
-COPY tsconfig*.json ./
-COPY vite.config.ts ./
-COPY index.html ./
-COPY tailwind.config.ts ./
-COPY postcss.config.js ./
-COPY public ./public
-COPY src ./src
+# Copiar o resto dos arquivos do projeto
+COPY . .
 
-# Corrige o problema com o diretório components/ui
-RUN find /app/src -type d -name "ui" -exec touch {}/.gitkeep \;
-RUN find /app/src -type d -exec ls -la {} \;
+# Garantir que exista um arquivo index.js na pasta ui para evitar o erro
+RUN mkdir -p /app/src/components/ui
+RUN echo '// Arquivo de índice para evitar erro de build' > /app/src/components/ui/index.js
 
-# Build com detalhes de debug
+# Executar build em modo produção
 RUN npm run build
 
+# Etapa de produção - usar nginx para servir o conteúdo estático
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf

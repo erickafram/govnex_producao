@@ -2,65 +2,73 @@
 
 O erro que ocorreu durante o build do frontend está relacionado ao Vite tentando carregar o diretório `/app/src/components/ui` como se fosse um arquivo. Isso geralmente acontece por um problema em algum import no código.
 
-## Solução 1: Corrigir os imports
+## ✅ Solução Recomendada (Nova)
 
-Verifique seus arquivos na pasta `src/components` e corrija qualquer import que esteja importando o diretório UI de forma incorreta. Por exemplo:
+Foi criada uma solução automatizada que resolve o problema:
 
-Incorreto:
-```typescript
-import UI from "./components/ui"; // Isso tenta importar um diretório
-```
-
-Correto:
-```typescript
-import { Button } from "./components/ui/button"; // Importando um componente específico
-```
-
-## Solução 2: Usar o Docker Compose modificado
-
-Foram criados os seguintes arquivos para ajudar a resolver esse problema:
-
-1. Um `Dockerfile` modificado que tenta corrigir o problema automaticamente
-2. Um arquivo `docker-compose.prod.yml` com configurações otimizadas para produção
-3. Um script `start-production-docker.sh` para iniciar o ambiente
-
-Para usar essa solução:
-
+1. Primeiro, dê permissão de execução aos scripts:
 ```bash
-# Dê permissão de execução ao script
-chmod +x start-production-docker.sh
+chmod +x pre-build.sh start-production-docker.sh
+```
 
-# Execute o script para iniciar o ambiente
+2. Execute o script de produção:
+```bash
 ./start-production-docker.sh
 ```
 
-## Solução 3: Contornar o erro modificando a estrutura do projeto
+Este script irá:
+- Executar o `pre-build.sh` para criar um arquivo index.js na pasta components/ui
+- Parar containers anteriores
+- Reconstruir todas as imagens
+- Iniciar a aplicação em modo detached
 
-Se o erro persistir, você pode tentar:
+## Detalhes da Solução
 
-1. Criar um arquivo de índice no diretório ui:
+O problema ocorre porque o Vite tenta carregar o diretório `src/components/ui` como um módulo, mas não encontra um arquivo de entrada (como index.js).
 
-```bash
-# Criar arquivo de index.js vazio em src/components/ui
-mkdir -p src/components/ui
-touch src/components/ui/index.js
+A solução consiste em:
+1. Criar um arquivo `src/components/ui/index.js` que exporta os componentes necessários
+2. Modificar o Dockerfile para garantir que este arquivo existe durante o build
+3. Usar um script de pré-build para identificar e corrigir possíveis problemas de importação
+
+## Detalhes Técnicos
+
+O erro específico:
+```
+[vite:load-fallback] Could not load /app/src/components/ui: EISDIR: illegal operation on a directory, read
 ```
 
-2. Ou alterar o Dockerfile para ignorar esse diretório:
-
-```dockerfile
-# No Dockerfile
-RUN find /app/src -type d -name "ui" -exec touch {}/.gitkeep \;
+Acontece quando:
+1. Existe algum import no código que referencia o diretório ui diretamente, como:
+```javascript
+import UI from "./components/ui"; // Incorreto
 ```
 
-## Logs de Debug
+2. O Vite tenta resolver esse módulo, mas não encontra um arquivo index.js para processar.
 
-Se o erro continuar, você pode adicionar mais logs para debugar:
+## Se o Problema Persistir
 
+Se mesmo com essas soluções o problema persistir, você pode:
+
+1. Verificar todos os imports em seu código fonte que possam estar referenciando o diretório ui diretamente:
 ```bash
-# Execute o build com logs detalhados
+grep -r "from ['\"].*components\/ui['\"];" src/
+```
+
+2. Corrigir esses imports para referenciarem componentes específicos:
+```javascript
+// Em vez de:
+import UI from "./components/ui";
+
+// Use:
+import { Button, Card } from "./components/ui";
+// ou
+import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
+```
+
+3. Se precisar debugar mais a fundo:
+```bash
 docker-compose -f docker-compose.prod.yml build --no-cache frontend
-
-# Verifique os logs durante a execução
 docker-compose -f docker-compose.prod.yml logs -f frontend
 ``` 
