@@ -5,7 +5,20 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-COPY . .
+# Copia apenas os arquivos necessários
+COPY tsconfig*.json ./
+COPY vite.config.ts ./
+COPY index.html ./
+COPY tailwind.config.ts ./
+COPY postcss.config.js ./
+COPY public ./public
+COPY src ./src
+
+# Corrige o problema com o diretório components/ui
+RUN find /app/src -type d -name "ui" -exec touch {}/.gitkeep \;
+RUN find /app/src -type d -exec ls -la {} \;
+
+# Build com detalhes de debug
 RUN npm run build
 
 FROM nginx:alpine
