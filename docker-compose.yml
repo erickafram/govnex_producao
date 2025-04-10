@@ -41,7 +41,7 @@ services:
       - mysql-data:/var/lib/mysql
       - ./govnex.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - govnex-network
 
