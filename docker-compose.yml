@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+      - db
+    networks:
+      - govnex-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: Senha@Forte2025!
+      DB_NAME: govnex
+      DB_PORT: 3306
+    depends_on:
+      - db
+    networks:
+      - govnex-network
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Senha@Forte2025!
+      MYSQL_DATABASE: govnex
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./govnex.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - govnex-network
+
+networks:
+  govnex-network:
+    driver: bridge
+
+volumes:
+  mysql-data: 
